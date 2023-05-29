@@ -3,8 +3,10 @@ import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
 
 import type { Database } from "@/lib/database.types";
+import { Input } from "./ui/input";
+import { Button } from "./ui/button";
 
-export default async function Login() {
+export default function Login() {
   const handleSignUp = async (formData: FormData) => {
     "use server";
     const email = String(formData.get("email"));
@@ -45,11 +47,11 @@ export default async function Login() {
 
   return (
     <form action={handleSignUp}>
-      <input name="email" />
-      <input type="password" name="password" />
-      <button>Sign up</button>
-      <button formAction={handleSignIn}>Sign in</button>
-      <button formAction={handleSignOut}>Sign out</button>
+      <Input name="email" />
+      <Input type="password" name="password" />
+      <Button>Sign up</Button>
+      <Button formAction={handleSignIn}>Sign in</Button>
+      <Button formAction={handleSignOut}>Sign out</Button>
     </form>
   );
 }
