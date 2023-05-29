@@ -2,7 +2,18 @@
 const nextConfig = {
   experimental: {
     appDir: true,
+    serverActions: true,
   },
-}
+  images: {
+    remotePatterns: [
+      {
+        hostname: "picsum.photos",
+      },
+      {
+        hostname: "i.pravatar.cc",
+      },
+    ],
+  },
+};
 
-module.exports = nextConfig
+module.exports = nextConfig;

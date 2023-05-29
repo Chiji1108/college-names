@@ -1,5 +1,4 @@
 import "./globals.css";
-import SupabaseProvider from "./supabase-provider";
 
 export const metadata = {
   title: "カレッジアプリ",
@@ -13,9 +12,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="ja">
-      <body className="bg-slate-100 flex justify-center">
-        <div className="max-w-xl w-full bg-white min-h-screen">
-          <SupabaseProvider>{children}</SupabaseProvider>
+      <body className="bg-slate-100 flex justify-center font-sans">
+        <div className="max-w-xl w-full bg-background min-h-screen text-primary">
+          {children}
         </div>
       </body>
     </html>
