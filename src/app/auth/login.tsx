@@ -3,8 +3,8 @@ import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
 
 import type { Database } from "@/lib/database.types";
-import { Input } from "./ui/input";
-import { Button } from "./ui/button";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 
 export default function Login() {
   const handleSignUp = async (formData: FormData) => {

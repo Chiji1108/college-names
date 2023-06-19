@@ -1,5 +1,8 @@
 import { Badge } from "@/components/badge";
+import { Database } from "@/lib/database.types";
 import { cn } from "@/lib/utils";
+import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
+import { cookies } from "next/headers";
 import { cva } from "class-variance-authority";
 import {
   Facebook,
@@ -9,14 +12,26 @@ import {
   Slack,
   Twitter,
 } from "lucide-react";
+import { notFound } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 
-// async function getData() {
-//   const res =
-// }
+export default async function Page({
+  params,
+}: {
+  params: { username: string };
+}) {
+  const supabase = createServerComponentClient<Database>({ cookies });
+  const { data, error } = await supabase
+    .from("profiles")
+    .select("*")
+    .eq("username", params.username)
+    .maybeSingle();
+  if (error) throw error;
+  if (!data) {
+    notFound();
+  }
 
-export default function Page({ params }: { params: { username: string } }) {
   return (
     <div>
       <header className="w-full aspect-video">
@@ -31,15 +46,28 @@ export default function Page({ params }: { params: { username: string } }) {
       <article className="flex flex-col gap-10">
         <section className="container -mt-[64px] flex flex-col items-center gap-1">
           <div className="w-[128px] h-[128px] rounded-full overflow-hidden border-background border-4">
-            <Image
+            {/* <Image
               src="https://i.pravatar.cc/300"
               alt="profile icon"
               width={300}
               height={300}
               className="object-cover"
-            />
+            /> */}
+            {data.avatar_url ? (
+              <img
+                src={data.avatar_url}
+                alt="avatar"
+                className="object-cover"
+              />
+            ) : (
+              <img
+                src="https://i.pravatar.cc/300"
+                alt="dummy"
+                className="object-cover"
+              />
+            )}
           </div>
-          <h1 className="font-bold text-2xl">ちぢ</h1>
+          <h1 className="font-bold text-2xl">{data.nick_name}</h1>
           <div className="flex gap-1 flex-wrap">
             <Badge
               size="sm"
@@ -51,12 +79,13 @@ export default function Page({ params }: { params: { username: string } }) {
             </Badge>
             <Badge size="sm">チューター</Badge>
           </div>
-          <div className="flex gap-1 flex-wrap justify-center text-sky-500">
-            <a>#プログラミング大好き</a>
-            <a>#あいうえお</a>
-            <a>#うんちうんちうんち</a>
-            <a>#ミリオンダラー</a>
-          </div>
+          {data.bio_tags && (
+            <div className="flex gap-1 flex-wrap justify-center text-sky-500">
+              {data.bio_tags.map((tag) => (
+                <p key={tag}>#{tag}</p>
+              ))}
+            </div>
+          )}
         </section>
         <BadgeGroup title="👋 基本情報">
           <Badge icon="🪪">千々岩真吾</Badge>
