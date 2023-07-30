@@ -12,6 +12,9 @@ const nextConfig = {
       {
         hostname: "i.pravatar.cc",
       },
+      {
+        hostname: "ddxagjposirivghwfhoo.supabase.co",
+      },
     ],
   },
 };

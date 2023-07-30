@@ -24,60 +24,67 @@ export default async function Page({
   const supabase = createServerComponentClient<Database>({ cookies });
   const { data, error } = await supabase
     .from("profiles")
-    .select("*")
+    .select(
+      `
+      *,
+      groups(*),
+      profiles_groups(*),
+      profiles_contacts(profile_id, twitter)
+    `
+    )
     .eq("username", params.username)
     .maybeSingle();
   if (error) throw error;
   if (!data) {
     notFound();
   }
+  console.log(data);
 
   return (
     <div>
-      <header className="w-full aspect-video">
+      {/* <header className="w-full aspect-video">
         <Image
           src="https://picsum.photos/1600/900"
           alt="image1"
           width={1600}
           height={900}
         />
-      </header>
-      {/* <div className="w-full h-[100px]"></div> */}
-      <article className="flex flex-col gap-10">
-        <section className="container -mt-[64px] flex flex-col items-center gap-1">
+      </header> */}
+      <article className="mt-48 flex flex-col gap-10">
+        <section className="mb-12 container -mt-[64px] flex flex-col items-center gap-1">
           <div className="w-[128px] h-[128px] rounded-full overflow-hidden border-background border-4">
-            {/* <Image
-              src="https://i.pravatar.cc/300"
-              alt="profile icon"
-              width={300}
-              height={300}
-              className="object-cover"
-            /> */}
             {data.avatar_url ? (
-              <img
+              <Image
                 src={data.avatar_url}
                 alt="avatar"
                 className="object-cover"
+                width={300}
+                height={300}
               />
             ) : (
-              <img
+              <Image
                 src="https://i.pravatar.cc/300"
                 alt="dummy"
                 className="object-cover"
+                width={300}
+                height={300}
               />
             )}
           </div>
           <h1 className="font-bold text-2xl">{data.nick_name}</h1>
           <div className="flex gap-1 flex-wrap">
-            <Badge
+            {data.groups.map((group) => (
+              <Badge key={group.id}>{group.name}</Badge>
+            ))}
+            {/* <Badge
               size="sm"
-              icon={
-                <div className="rounded-full h-2 w-2 overflow-hidden bg-emerald-400" />
-              }
+              // icon={
+              //   <div className="rounded-full h-2 w-2 overflow-hidden bg-emerald-400" />
+              // }
             >
               RP2
             </Badge>
-            <Badge size="sm">チューター</Badge>
+            <Badge size="sm">チューター</Badge> */}
           </div>
           {data.bio_tags && (
             <div className="flex gap-1 flex-wrap justify-center text-sky-500">
