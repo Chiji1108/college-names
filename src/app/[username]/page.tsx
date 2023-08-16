@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils";
 import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
 import { cookies } from "next/headers";
 import { cva } from "class-variance-authority";
+import { prisma } from "@/lib/prisma";
 import {
   Facebook,
   Instagram,
@@ -21,20 +22,20 @@ export default async function Page({
 }: {
   params: { username: string };
 }) {
-  const supabase = createServerComponentClient<Database>({ cookies });
-  const { data, error } = await supabase
-    .from("profiles")
-    .select(
-      `
-      *,
-      groups(*),
-      profiles_groups(*),
-      profiles_contacts(profile_id, twitter)
-    `
-    )
-    .eq("username", params.username)
-    .maybeSingle();
-  if (error) throw error;
+  // const supabase = createServerComponentClient<Database>({ cookies });
+  // const { data, error } = await supabase
+  //   .from("profiles")
+  //   .select(
+  //     `
+  //     *,
+  //     groups(*),
+  //     profiles_groups(*),
+  //     profiles_contacts(profile_id, twitter)
+  //   `
+  //   )
+  //   .eq("username", params.username)
+  //   .maybeSingle();
+
   if (!data) {
     notFound();
   }
@@ -73,9 +74,9 @@ export default async function Page({
           </div>
           <h1 className="font-bold text-2xl">{data.nick_name}</h1>
           <div className="flex gap-1 flex-wrap">
-            {data.groups.map((group) => (
+            {/* {data.groups.map((group) => (
               <Badge key={group.id}>{group.name}</Badge>
-            ))}
+            ))} */}
             {/* <Badge
               size="sm"
               // icon={
@@ -110,7 +111,7 @@ export default async function Page({
           <Badge icon="📚">カレッジライフ分科会</Badge>
           <Badge icon="🧘‍♂️">ヨガ</Badge>
         </BadgeGroup>
-        <section>
+        {/* <section>
           <div className="w-full aspect-video">
             <Image
               src="https://picsum.photos/1600/900"
@@ -127,7 +128,7 @@ export default async function Page({
               height={900}
             />
           </div>
-        </section>
+        </section> */}
         <BadgeGroup title="🍳 カレッジスキル">
           <Badge icon="🤖">Slackボット</Badge>
           <Badge icon="🧑‍💻">プログラミング</Badge>
