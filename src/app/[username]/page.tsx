@@ -1,4 +1,4 @@
-import { Badge } from "@/components/badge";
+import { Chip } from "@/components/chip";
 import { Database } from "@/lib/database.types";
 import { cn } from "@/lib/utils";
 import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
@@ -16,47 +16,91 @@ import {
 import { notFound } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
+import { format } from "date-fns";
+import { Badge } from "@/components/ui/badge";
+import { AvatarGroup } from "@/components/avatar-group";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { ChipGroup } from "@/components/chip-group";
+import { ComponentProps, forwardRef } from "react";
 
 export default async function Page({
   params,
 }: {
   params: { username: string };
 }) {
-  // const supabase = createServerComponentClient<Database>({ cookies });
-  // const { data, error } = await supabase
-  //   .from("profiles")
-  //   .select(
-  //     `
-  //     *,
-  //     groups(*),
-  //     profiles_groups(*),
-  //     profiles_contacts(profile_id, twitter)
-  //   `
-  //   )
-  //   .eq("username", params.username)
-  //   .maybeSingle();
+  const profile = await prisma.profiles.findUnique({
+    where: { username: params.username },
+    include: {
+      profiles_groups: {
+        include: {
+          groups: {
+            include: {
+              profiles_groups: {
+                include: {
+                  profiles: true,
+                },
+              },
+            },
+          },
+        },
+      },
+      residence_histories: true,
+      educations: {
+        include: {
+          schools: true,
+        },
+      },
+      experiences: {
+        include: {
+          companies: true,
+        },
+      },
+      profiles_badges: {
+        include: {
+          badges: {
+            include: {
+              badge_categories: true,
+            },
+          },
+        },
+      },
+    },
+  });
 
-  if (!data) {
-    notFound();
-  }
-  console.log(data);
+  if (!profile) notFound();
+
+  const college_skills = profile.profiles_badges.filter(
+    (profiles_badge) =>
+      Number(profiles_badge.badges.badge_categories.parent_id) == 3
+  );
+
+  const interests = profile.profiles_badges.filter(
+    (profiles_badge) =>
+      Number(profiles_badge.badges.badge_categories.parent_id) == 1
+  );
+
+  const lifestages = profile.profiles_badges.filter(
+    (profiles_badge) =>
+      Number(profiles_badge.badges.badge_categories.parent_id) == 2
+  );
 
   return (
-    <div>
-      {/* <header className="w-full aspect-video">
+    <div className="mx-auto w-full px-4.5 xs:px-6 sm:px-10 md:px-11 lg:px-12 max-w-2xl">
+      <header className="mt-6 mx-6 overflow-hidden rounded-lg shadow-inner">
         <Image
           src="https://picsum.photos/1600/900"
           alt="image1"
           width={1600}
           height={900}
+          className="object-cover object-center"
         />
-      </header> */}
-      <article className="mt-48 flex flex-col gap-10">
-        <section className="mb-12 container -mt-[64px] flex flex-col items-center gap-1">
+      </header>
+      <article className="flex flex-col gap-24">
+        <section className="mx-6 -mt-[64px] flex flex-col items-center gap-2">
           <div className="w-[128px] h-[128px] rounded-full overflow-hidden border-background border-4">
-            {data.avatar_url ? (
+            {profile.avatar_url ? (
               <Image
-                src={data.avatar_url}
+                src={profile.avatar_url}
                 alt="avatar"
                 className="object-cover"
                 width={300}
@@ -72,100 +116,242 @@ export default async function Page({
               />
             )}
           </div>
-          <h1 className="font-bold text-2xl">{data.nick_name}</h1>
-          <div className="flex gap-1 flex-wrap">
-            {/* {data.groups.map((group) => (
-              <Badge key={group.id}>{group.name}</Badge>
-            ))} */}
-            {/* <Badge
-              size="sm"
-              // icon={
-              //   <div className="rounded-full h-2 w-2 overflow-hidden bg-emerald-400" />
-              // }
-            >
-              RP2
-            </Badge>
-            <Badge size="sm">チューター</Badge> */}
+          <h1 className="font-bold text-2xl">{profile.nick_name}</h1>
+          <div className="mx-4 flex items-center gap-2 flex-wrap">
+            {profile.profiles_groups.map((profiles_group) => (
+              <Badge
+                key={Number(profiles_group.groups.id)}
+                variant={"secondary"}
+              >
+                {profiles_group.groups.name}
+              </Badge>
+            ))}
           </div>
-          {data.bio_tags && (
-            <div className="flex gap-1 flex-wrap justify-center text-sky-500">
-              {data.bio_tags.map((tag) => (
+          {profile.bio_tags && (
+            <div className="text-center mx-4 mt-2 flex gap-1 flex-wrap justify-center text-sky-500">
+              {profile.bio_tags.map((tag) => (
                 <p key={tag}>#{tag}</p>
               ))}
             </div>
           )}
         </section>
-        <BadgeGroup title="👋 基本情報">
-          <Badge icon="🪪">千々岩真吾</Badge>
-          <Badge icon="👣">Apr &apos;22 -</Badge>
-          <Badge icon="📮">325</Badge>
-          <Badge icon="🛏️">207</Badge>
-          <Badge icon="🎂">Nov 8, 1999</Badge>
-          <Badge icon="💬">日本語</Badge>
-          <Badge icon="🧩">INFP</Badge>
-          <Badge icon="🚬">吸わない</Badge>
-          <Badge icon="🍺">付き合いで飲む程度</Badge>
-        </BadgeGroup>
-        <BadgeGroup title="👥 グループ">
-          <Badge>House B</Badge>
-          <Badge icon="📚">カレッジライフ分科会</Badge>
-          <Badge icon="🧘‍♂️">ヨガ</Badge>
-        </BadgeGroup>
-        {/* <section>
-          <div className="w-full aspect-video">
-            <Image
-              src="https://picsum.photos/1600/900"
-              alt="image1"
-              width={1600}
-              height={900}
-            />
-          </div>
-          <div className="w-full aspect-video">
-            <Image
-              src="https://picsum.photos/1600/900"
-              alt="image1"
-              width={1600}
-              height={900}
-            />
-          </div>
-        </section> */}
-        <BadgeGroup title="🍳 カレッジスキル">
-          <Badge icon="🤖">Slackボット</Badge>
-          <Badge icon="🧑‍💻">プログラミング</Badge>
-        </BadgeGroup>
-        <BadgeGroup title="🏄 趣味・興味">
-          <Badge icon="✏️">デザイン</Badge>
-          <Badge icon="🎲">ボードゲーム</Badge>
-          <Badge icon="🚶">ウォーキング</Badge>
-        </BadgeGroup>
-        <BadgeGroup title="👟 ライフステージ">
-          <Badge icon="🌎">海外に行きたい</Badge>
-          <Badge icon="💫">セラピーに通院</Badge>
-        </BadgeGroup>
-        <section>
-          <div className="w-full aspect-video">
-            <Image
-              src="https://picsum.photos/1600/900"
-              alt="image1"
-              width={1600}
-              height={900}
-            />
-          </div>
-        </section>
-        <section className="container">
-          <H2>🎓 Education</H2>
-          <div className="flex gap-3 flex-col">
+        <Section title="👋 基本情報">
+          <ChipGroup>
+            {profile.full_name && <Chip icon="🪪">{profile.full_name}</Chip>}
+            {profile.residence_histories.map((residence_history) => (
+              <Chip key={Number(residence_history.id)} icon="👣">
+                {residence_history.move_in_date &&
+                  format(residence_history.move_in_date, "MMM d, y")}{" "}
+                -{" "}
+                {residence_history.move_out_date &&
+                  format(residence_history.move_out_date, "MMM d, y")}
+              </Chip>
+            ))}
+            {profile.post_number && (
+              <Chip icon="📮">{profile.post_number}</Chip>
+            )}
+            {profile.room_number && (
+              <Chip icon="🛏️">{profile.room_number}</Chip>
+            )}
+            {profile.date_of_birth && (
+              <Chip icon="🎂">{format(profile.date_of_birth, "MMM d, y")}</Chip>
+            )}
+            {profile.profiles_badges
+              .filter(
+                (profiles_badge) =>
+                  Number(profiles_badge.badges.category_id) == 4
+              )
+              .map((profiles_badge) => (
+                <Chip
+                  key={Number(profiles_badge.badges.id)}
+                  icon={profiles_badge.badges.emoji}
+                >
+                  {profiles_badge.badges.name}
+                </Chip>
+              ))}
+            {profile.profiles_badges
+              .filter(
+                (profiles_badge) =>
+                  Number(profiles_badge.badges.category_id) == 5
+              )
+              .map((profiles_badge) => (
+                <Chip
+                  key={Number(profiles_badge.badges.id)}
+                  icon={profiles_badge.badges.emoji}
+                >
+                  {profiles_badge.badges.name}
+                </Chip>
+              ))}
+            {profile.profiles_badges
+              .filter(
+                (profiles_badge) =>
+                  Number(profiles_badge.badges.category_id) == 6
+              )
+              .map((profiles_badge) => (
+                <Chip
+                  key={Number(profiles_badge.badges.id)}
+                  icon={profiles_badge.badges.emoji}
+                >
+                  {profiles_badge.badges.name}
+                </Chip>
+              ))}
+            {profile.profiles_badges
+              .filter(
+                (profiles_badge) =>
+                  Number(profiles_badge.badges.category_id) == 7
+              )
+              .map((profiles_badge) => (
+                <Chip
+                  key={Number(profiles_badge.badges.id)}
+                  icon={profiles_badge.badges.emoji}
+                >
+                  {profiles_badge.badges.name}
+                </Chip>
+              ))}
+          </ChipGroup>
+        </Section>
+        <Section title="👥 グループ">
+          {profile.profiles_groups.length > 0 ? (
+            <div className="grid grid-cols-1 divide-y">
+              {profile.profiles_groups.map((profiles_group) => (
+                <div
+                  key={Number(profiles_group.groups.id)}
+                  className="flex gap-4 py-3"
+                >
+                  <div className="w-24 h-24 aspect-square rounded-lg overflow-hidden shrink-0">
+                    {profiles_group.groups.image_url ? (
+                      <Image
+                        src={profiles_group.groups.image_url}
+                        width={1600}
+                        height={900}
+                        alt="thumbnail"
+                        className="object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-secondary grid place-content-center text-2xl">
+                        👥
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex flex-col justify-around">
+                    <div>
+                      <h3 className="font-bold text-lg/5 line-clamp-1">
+                        {profiles_group.groups.full_name ||
+                          profiles_group.groups.name}
+                      </h3>
+                      {profiles_group.groups.slack_channel && (
+                        <p className="text-sm text-muted-foreground line-clamp-1">
+                          #{profiles_group.groups.slack_channel}
+                        </p>
+                      )}
+                    </div>
+                    <AvatarGroup max={5}>
+                      {profiles_group.groups.profiles_groups.map((member) => (
+                        <Avatar
+                          className="border-background border-2"
+                          key={member.profile_id}
+                        >
+                          {member.profiles.avatar_url && (
+                            <AvatarImage
+                              src={member.profiles.avatar_url}
+                              alt={
+                                member.profiles.nick_name ||
+                                member.profiles.full_name
+                              }
+                              className="object-cover"
+                              width={300}
+                              height={300}
+                            />
+                          )}
+                          <AvatarFallback>
+                            {(
+                              member.profiles.nick_name ||
+                              member.profiles.full_name
+                            ).substring(0, 1)}
+                          </AvatarFallback>
+                        </Avatar>
+                      ))}
+                    </AvatarGroup>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-center">所属しているグループはありません。</p>
+          )}
+        </Section>
+        <Section className="overflow-hidden rounded-lg shadow-inner">
+          <Image
+            src="https://picsum.photos/1600/900"
+            alt="image1"
+            width={1600}
+            height={900}
+            className="object-cover object-center"
+          />
+        </Section>
+        {interests.length > 0 && (
+          <Section title="🏄 趣味・興味">
+            <ChipGroup>
+              {interests.map((profiles_badge) => (
+                <Chip
+                  key={Number(profiles_badge.badges.id)}
+                  icon={profiles_badge.badges.emoji}
+                >
+                  {profiles_badge.badges.name}
+                </Chip>
+              ))}
+            </ChipGroup>
+          </Section>
+        )}
+        {lifestages.length > 0 && (
+          <Section title="👟 ライフステージ">
+            <ChipGroup>
+              {lifestages.map((profiles_badge) => (
+                <Chip
+                  key={Number(profiles_badge.badges.id)}
+                  icon={profiles_badge.badges.emoji}
+                >
+                  {profiles_badge.badges.name}
+                </Chip>
+              ))}
+            </ChipGroup>
+          </Section>
+        )}
+        {college_skills.length > 0 && (
+          <Section title="🍳 カレッジスキル">
+            <ChipGroup>
+              {college_skills.map((profiles_badge) => (
+                <Chip
+                  key={Number(profiles_badge.badges.id)}
+                  icon={profiles_badge.badges.emoji}
+                >
+                  {profiles_badge.badges.name}
+                </Chip>
+              ))}
+            </ChipGroup>
+          </Section>
+        )}
+        <Section className="overflow-hidden rounded-lg shadow-inner">
+          <Image
+            src="https://picsum.photos/1600/900"
+            alt="image1"
+            width={1600}
+            height={900}
+            className="object-cover object-center"
+          />
+        </Section>
+        <Section title="🎓 Education">
+          <CardGroup>
             <HistoryItem
               primary="慶應義塾大学"
               secondary="環境情報学部"
               date="現在"
             />
             <HistoryItem primary="慶應義塾高校" date="2018" />
-          </div>
-        </section>
-        <section className="container">
-          <H2>💼 Experience</H2>
-          <div className="flex gap-3 flex-col">
+          </CardGroup>
+        </Section>
+        <Section title="💼 Experience">
+          <CardGroup>
             <HistoryItem
               primary="ソフトウェアエンジニア"
               secondary="株式会社Plugo"
@@ -176,97 +362,96 @@ export default async function Page({
               secondary="株式会社Penmark"
               date="1ヶ月"
             />
-          </div>
-        </section>
-        <section>
-          <div className="w-full aspect-video">
-            <Image
-              src="https://picsum.photos/1600/900"
-              alt="image1"
-              width={1600}
-              height={900}
-            />
-          </div>
-        </section>
-        <section className="container">
-          <H2>💬 質問箱チョイス</H2>
-          <div className="flex gap-3 flex-col">
-            <div className={card()}>
+          </CardGroup>
+        </Section>
+        <Section className="overflow-hidden rounded-lg shadow-inner">
+          <Image
+            src="https://picsum.photos/1600/900"
+            alt="image1"
+            width={1600}
+            height={900}
+            className="object-cover object-center"
+          />
+        </Section>
+        <Section title="💬 質問箱チョイス">
+          <CardGroup>
+            <Card>
               <p className="text-sm text-muted-foreground mb-0.5">
                 Youは何しにカレッジへ？
               </p>
               <p>寮生活が楽しそうだったから！</p>
-            </div>
-            <div className={card()}>
+            </Card>
+            <Card>
               <p className="text-sm text-muted-foreground mb-0.5">
                 趣味について詳しく👀
               </p>
               <p>サービス開発が大好き！みんなの役にたつアプリを作りたい！</p>
-            </div>
-            <div className={card()}>
+            </Card>
+            <Card>
               <p className="text-sm text-muted-foreground mb-0.5">
                 今カレッジに求めることは？
               </p>
               <p>心理的安全性</p>
-            </div>
-          </div>
-        </section>
-        <section>
-          <div className="w-full aspect-video">
-            <Image
-              src="https://picsum.photos/1600/900"
-              alt="image1"
-              width={1600}
-              height={900}
-            />
-          </div>
-        </section>
-        <BadgeGroup title="✉️ SNS・連絡先">
-          <Link href="https://twitter.com/Chijidosu">
-            <Badge icon={<Twitter size={16} />}>
-              <span className="text-sky-500">chijidosu</span>
-            </Badge>
-          </Link>
-          <Link href="https://twitter.com/Chijidosu">
-            <Badge icon={<Instagram size={16} />}>
-              <span className="text-sky-500">chijiiwashingo</span>
-            </Badge>
-          </Link>
-          <Link href="https://twitter.com/Chijidosu">
-            <Badge icon={<Facebook size={16} />}>
-              <span className="text-sky-500">Chijidosu</span>
-            </Badge>
-          </Link>
-          <Link href="https://twitter.com/Chijidosu">
-            <Badge icon={<Linkedin size={16} />}>
-              <span className="text-sky-500">chiji1108</span>
-            </Badge>
-          </Link>
-          <Link href="https://twitter.com/Chijidosu">
-            <Badge
-              icon={
-                <Image
-                  src="/paypay.png"
-                  alt="PayPay Logo"
-                  width={180}
-                  height={180}
-                />
-              }
-            >
-              <span className="text-sky-500">chiji1108</span>
-            </Badge>
-          </Link>
-          <Link href="https://twitter.com/Chijidosu">
-            <Badge icon={<Slack size={16} />}>
-              <span className="text-sky-500">s.chijiiwa@hlab.college</span>
-            </Badge>
-          </Link>
-          <Link href="https://twitter.com/Chijidosu">
-            <Badge icon={<Mail size={16} />}>
-              <span className="text-sky-500">chiji@keio.jp</span>
-            </Badge>
-          </Link>
-        </BadgeGroup>
+            </Card>
+          </CardGroup>
+        </Section>
+        <Section className="overflow-hidden rounded-lg shadow-inner">
+          <Image
+            src="https://picsum.photos/1600/900"
+            alt="image1"
+            width={1600}
+            height={900}
+            className="object-cover object-center"
+          />
+        </Section>
+        <Section title="✉️ SNS・連絡先">
+          <ChipGroup>
+            <Link href="https://twitter.com/Chijidosu">
+              <Chip icon={<Twitter size={16} />}>
+                <span className="text-sky-500">chijidosu</span>
+              </Chip>
+            </Link>
+            <Link href="https://twitter.com/Chijidosu">
+              <Chip icon={<Instagram size={16} />}>
+                <span className="text-sky-500">chijiiwashingo</span>
+              </Chip>
+            </Link>
+            <Link href="https://twitter.com/Chijidosu">
+              <Chip icon={<Facebook size={16} />}>
+                <span className="text-sky-500">Chijidosu</span>
+              </Chip>
+            </Link>
+            <Link href="https://twitter.com/Chijidosu">
+              <Chip icon={<Linkedin size={16} />}>
+                <span className="text-sky-500">chiji1108</span>
+              </Chip>
+            </Link>
+            <Link href="https://twitter.com/Chijidosu">
+              <Chip
+                icon={
+                  <Image
+                    src="/paypay.png"
+                    alt="PayPay Logo"
+                    width={180}
+                    height={180}
+                  />
+                }
+              >
+                <span className="text-sky-500">chiji1108</span>
+              </Chip>
+            </Link>
+            <Link href="https://twitter.com/Chijidosu">
+              <Chip icon={<Slack size={16} />}>
+                <span className="text-sky-500">s.chijiiwa@hlab.college</span>
+              </Chip>
+            </Link>
+            <Link href="https://twitter.com/Chijidosu">
+              <Chip icon={<Mail size={16} />}>
+                <span className="text-sky-500">chiji@keio.jp</span>
+              </Chip>
+            </Link>
+          </ChipGroup>
+        </Section>
       </article>
       <footer className="mt-16 grid place-content-center text-sm text-muted-foreground py-8">
         &#169; College App
@@ -275,43 +460,53 @@ export default async function Page({
   );
 }
 
-interface BadgeGroupProps extends React.HTMLAttributes<HTMLDivElement> {
-  title: string;
+interface SectionProps extends ComponentProps<"section"> {
+  title?: string;
 }
 
-function BadgeGroup({ title, children }: BadgeGroupProps) {
+function Section({ title, children, className, ...props }: SectionProps) {
   return (
-    <section className="container">
-      <H2>{title}</H2>
-      <div className="flex gap-2 flex-wrap">{children}</div>
+    <section className={cn("mx-6", className)} {...props}>
+      {title && <h2 className="font-bold mb-4 text-lg">{title}</h2>}
+      {children}
     </section>
   );
 }
 
-interface H2Props extends React.HTMLAttributes<HTMLHeadingElement> {}
-
-function H2({ children }: H2Props) {
-  return <h2 className="font-bold mb-3 text-lg">{children}</h2>;
-}
-
-interface HistoryItemProps extends React.HTMLAttributes<HTMLDivElement> {
+interface HistoryItemProps extends ComponentProps<"div"> {
   primary: string;
   secondary?: string;
   date: string;
 }
 
-function HistoryItem({ primary, secondary, date }: HistoryItemProps) {
+function HistoryItem({ primary, secondary, date, ...props }: HistoryItemProps) {
   return (
-    <div className={cn("leading-tight", card())}>
+    <Card className="leading-tight" {...props}>
       <div className="mb-0.5">
         <p>{primary}</p>
         {secondary && <p>{secondary}</p>}
       </div>
       <p className="text-sm text-muted-foreground">{date}</p>
-    </div>
+    </Card>
   );
 }
 
-const card = cva(
-  "rounded-lg border bg-card text-card-foreground shadow-sm p-6"
-);
+interface CardProps extends ComponentProps<"div"> {}
+
+function Card({ className, ...props }: CardProps) {
+  return (
+    <div
+      className={cn(
+        "rounded-lg border bg-card text-card-foreground shadow-sm p-6",
+        className
+      )}
+      {...props}
+    />
+  );
+}
+
+interface CardGroupProps extends ComponentProps<"div"> {}
+
+function CardGroup({ className, ...props }: CardGroupProps) {
+  return <div className={cn("flex gap-4 flex-col", className)} {...props} />;
+}

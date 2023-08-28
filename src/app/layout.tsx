@@ -1,4 +1,4 @@
-import "./globals.css";
+import "@/styles/globals.css";
 
 export const metadata = {
   title: "カレッジアプリ",
@@ -12,11 +12,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="ja">
-      <body className="bg-slate-100 flex justify-center font-sans">
-        <div className="max-w-xl w-full bg-background min-h-screen text-primary">
-          {children}
-        </div>
-      </body>
+      <body>{children}</body>
     </html>
   );
 }

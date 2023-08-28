@@ -10,10 +10,10 @@ export default async function Page() {
   } = await supabase.auth.getUser();
 
   return (
-    <>
+    <div className="mx-auto w-full px-4.5 xs:px-6 sm:px-10 md:px-11 lg:px-12 max-w-2xl">
       <h1>Auth</h1>
       {user ? <p>{user.email}</p> : <p>no user</p>}
       <Login />
-    </>
+    </div>
   );
 }
