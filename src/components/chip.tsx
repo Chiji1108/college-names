@@ -1,7 +1,7 @@
 import { VariantProps, cva } from "class-variance-authority";
 
 import { cn } from "@/lib/utils";
-import { ComponentProps } from "react";
+import { ComponentProps, forwardRef } from "react";
 
 const chipVariants = cva(
   "text-center inline-flex items-center border rounded-full bg-card text-card-foreground shadow-sm",
@@ -34,18 +34,41 @@ const iconVariants = cva(
 );
 
 export interface ChipProps
-  extends ComponentProps<"div">,
+  extends ComponentProps<"li">,
     VariantProps<typeof chipVariants> {
   icon?: React.ReactNode;
 }
 
-function Chip({ className, size, icon, children, ...props }: ChipProps) {
-  return (
-    <div className={cn(chipVariants({ size }), className)} {...props}>
-      {icon && <span className={cn(iconVariants({ size }))}>{icon}</span>}
-      <span>{children}</span>
-    </div>
-  );
-}
+const Chip = forwardRef<HTMLLIElement, ChipProps>(
+  ({ className, size, icon, children, ...props }, ref) => {
+    return (
+      <li
+        className={cn(chipVariants({ size }), className)}
+        ref={ref}
+        {...props}
+      >
+        {icon && <span className={cn(iconVariants({ size }))}>{icon}</span>}
+        <span>{children}</span>
+      </li>
+    );
+  }
+);
+Chip.displayName = "Chip";
+
+// const MotionChip = motion(Chip);
+// MotionChip.defaultProps = {
+//   variants: {
+//     visible: {
+//       opacity: 1,
+//       y: 0,
+//       transition: { type: "spring", stiffness: 300, damping: 24 },
+//     },
+//     hidden: {
+//       opacity: 0,
+//       y: 20,
+//       transition: { duration: 0.2 },
+//     },
+//   },
+// };
 
 export { Chip, chipVariants };

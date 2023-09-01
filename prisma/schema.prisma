@@ -350,13 +350,16 @@ model experiences {
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model group_categories {
-  id                     BigInt       @id @default(autoincrement())
+  id                     BigInt             @id @default(autoincrement())
   name                   String
-  created_at             DateTime?    @default(now()) @db.Timestamptz(6)
-  can_change_join_status Boolean      @default(false)
-  can_join               availability
-  can_leave              availability
-  slug                   String       @unique
+  created_at             DateTime?          @default(now()) @db.Timestamptz(6)
+  is_editable            Boolean            @default(false)
+  join_type              availability       @default(allowed)
+  slug                   String             @unique
+  is_noteworthy          Boolean            @default(false)
+  parent_id              BigInt?
+  group_categories       group_categories?  @relation("group_categoriesTogroup_categories", fields: [parent_id], references: [id], onDelete: Restrict, onUpdate: NoAction)
+  other_group_categories group_categories[] @relation("group_categoriesTogroup_categories")
   groups                 groups[]
 
   @@schema("public")
@@ -368,8 +371,8 @@ model groups {
   name                String
   created_at          DateTime?             @default(now()) @db.Timestamptz(6)
   full_name           String?
-  from                DateTime?             @db.Date
-  to                  DateTime?             @db.Date
+  start_date          DateTime?             @db.Date
+  end_date            DateTime?             @db.Date
   slack_channel       String?
   category_id         BigInt
   image_url           String?
@@ -377,7 +380,7 @@ model groups {
   profiles_groups     profiles_groups[]
   residence_histories residence_histories[]
 
-  @@unique([name, from, to])
+  @@unique([name, start_date, end_date], map: "groups_name_from_to_key")
   @@schema("public")
 }
 
@@ -394,6 +397,8 @@ model profiles {
   post_number         String?
   bio_tags            String[]
   date_of_birth       DateTime?             @db.Date
+  is_admin            Boolean               @default(false)
+  slack_channel       String?
   educations          educations[]
   experiences         experiences[]
   users               users                 @relation(fields: [id], references: [id], onDelete: Cascade, onUpdate: NoAction)

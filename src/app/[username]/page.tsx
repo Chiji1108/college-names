@@ -1,10 +1,6 @@
 import { Chip } from "@/components/chip";
-import { Database } from "@/lib/database.types";
 import { cn } from "@/lib/utils";
-import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
-import { cookies } from "next/headers";
-import { cva } from "class-variance-authority";
-import { prisma } from "@/lib/prisma";
+
 import {
   Facebook,
   Instagram,
@@ -21,51 +17,26 @@ import { Badge } from "@/components/ui/badge";
 import { AvatarGroup } from "@/components/avatar-group";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ChipGroup } from "@/components/chip-group";
-import { ComponentProps, forwardRef } from "react";
+import { ComponentProps, Fragment, forwardRef } from "react";
+import { Separator } from "@/components/ui/separator";
+import { getProfiles } from "./services/get-profiles";
+import { getProfile } from "./services/get-profile";
+// import { FadeIn } from "@/components/fade-in";
+
+export async function generateStaticParams() {
+  const profiles = await getProfiles();
+
+  return profiles.map((profile) => ({
+    username: profile.username,
+  }));
+}
 
 export default async function Page({
   params,
 }: {
   params: { username: string };
 }) {
-  const profile = await prisma.profiles.findUnique({
-    where: { username: params.username },
-    include: {
-      profiles_groups: {
-        include: {
-          groups: {
-            include: {
-              profiles_groups: {
-                include: {
-                  profiles: true,
-                },
-              },
-            },
-          },
-        },
-      },
-      residence_histories: true,
-      educations: {
-        include: {
-          schools: true,
-        },
-      },
-      experiences: {
-        include: {
-          companies: true,
-        },
-      },
-      profiles_badges: {
-        include: {
-          badges: {
-            include: {
-              badge_categories: true,
-            },
-          },
-        },
-      },
-    },
-  });
+  const profile = await getProfile(params.username);
 
   if (!profile) notFound();
 
@@ -84,18 +55,24 @@ export default async function Page({
       Number(profiles_badge.badges.badge_categories.parent_id) == 2
   );
 
+  const isAlumni = profile.residence_histories.some(
+    (residence_history) =>
+      residence_history.move_out_date &&
+      residence_history.move_out_date < new Date()
+  );
+
   return (
     <div className="mx-auto w-full px-4.5 xs:px-6 sm:px-10 md:px-11 lg:px-12 max-w-2xl">
       <header className="mt-6 mx-6 overflow-hidden rounded-lg shadow-inner">
         <Image
           src="https://picsum.photos/1600/900"
-          alt="image1"
+          alt="header"
           width={1600}
           height={900}
           className="object-cover object-center"
         />
       </header>
-      <article className="flex flex-col gap-24">
+      <article className="flex flex-col gap-24 snap-y">
         <section className="mx-6 -mt-[64px] flex flex-col items-center gap-2">
           <div className="w-[128px] h-[128px] rounded-full overflow-hidden border-background border-4">
             {profile.avatar_url ? (
@@ -118,14 +95,20 @@ export default async function Page({
           </div>
           <h1 className="font-bold text-2xl">{profile.nick_name}</h1>
           <div className="mx-4 flex items-center gap-2 flex-wrap">
-            {profile.profiles_groups.map((profiles_group) => (
-              <Badge
-                key={Number(profiles_group.groups.id)}
-                variant={"secondary"}
-              >
-                {profiles_group.groups.name}
-              </Badge>
-            ))}
+            {profile.profiles_groups
+              .filter(
+                (profiles_group) =>
+                  profiles_group.groups.group_categories.is_noteworthy
+              )
+              .map((profiles_group) => (
+                <Badge
+                  key={Number(profiles_group.groups.id)}
+                  variant={"secondary"}
+                >
+                  {profiles_group.groups.name}
+                </Badge>
+              ))}
+            {isAlumni && <Badge variant={"secondary"}>アラムナイ</Badge>}
           </div>
           {profile.bio_tags && (
             <div className="text-center mx-4 mt-2 flex gap-1 flex-wrap justify-center text-sky-500">
@@ -212,12 +195,15 @@ export default async function Page({
         </Section>
         <Section title="👥 グループ">
           {profile.profiles_groups.length > 0 ? (
-            <div className="grid grid-cols-1 divide-y">
-              {profile.profiles_groups.map((profiles_group) => (
-                <div
-                  key={Number(profiles_group.groups.id)}
-                  className="flex gap-4 py-3"
-                >
+            <div className="grid grid-cols-[6rem_minmax(0,_1fr)] gap-y-2 gap-x-4">
+              {profile.profiles_groups.map((profiles_group, i) => (
+                <Fragment key={Number(profiles_group.groups.id)}>
+                  {i > 0 && (
+                    <>
+                      <div />
+                      <Separator />
+                    </>
+                  )}
                   <div className="w-24 h-24 aspect-square rounded-lg overflow-hidden shrink-0">
                     {profiles_group.groups.image_url ? (
                       <Image
@@ -273,19 +259,20 @@ export default async function Page({
                       ))}
                     </AvatarGroup>
                   </div>
-                </div>
+                  {/* </div> */}
+                </Fragment>
               ))}
             </div>
           ) : (
             <p className="text-center">所属しているグループはありません。</p>
           )}
         </Section>
-        <Section className="overflow-hidden rounded-lg shadow-inner">
+        <Section className="overflow-hidden rounded-lg shadow-inner snap-center">
           <Image
-            src="https://picsum.photos/1600/900"
+            src="https://picsum.photos/900/1200"
             alt="image1"
-            width={1600}
-            height={900}
+            width={900}
+            height={1200}
             className="object-cover object-center"
           />
         </Section>
@@ -331,12 +318,12 @@ export default async function Page({
             </ChipGroup>
           </Section>
         )}
-        <Section className="overflow-hidden rounded-lg shadow-inner">
+        <Section className="overflow-hidden rounded-lg shadow-inner snap-center">
           <Image
-            src="https://picsum.photos/1600/900"
+            src="https://picsum.photos/1024/1024"
             alt="image1"
-            width={1600}
-            height={900}
+            width={1024}
+            height={1024}
             className="object-cover object-center"
           />
         </Section>
@@ -364,12 +351,12 @@ export default async function Page({
             />
           </CardGroup>
         </Section>
-        <Section className="overflow-hidden rounded-lg shadow-inner">
+        <Section className="overflow-hidden rounded-lg shadow-inner snap-center">
           <Image
-            src="https://picsum.photos/1600/900"
+            src="https://picsum.photos/1200/1200"
             alt="image1"
-            width={1600}
-            height={900}
+            width={1200}
+            height={1200}
             className="object-cover object-center"
           />
         </Section>
@@ -395,11 +382,11 @@ export default async function Page({
             </Card>
           </CardGroup>
         </Section>
-        <Section className="overflow-hidden rounded-lg shadow-inner">
+        <Section className="overflow-hidden rounded-lg shadow-inner snap-center">
           <Image
-            src="https://picsum.photos/1600/900"
+            src="https://picsum.photos/900/900"
             alt="image1"
-            width={1600}
+            width={900}
             height={900}
             className="object-cover object-center"
           />
@@ -468,6 +455,7 @@ function Section({ title, children, className, ...props }: SectionProps) {
   return (
     <section className={cn("mx-6", className)} {...props}>
       {title && <h2 className="font-bold mb-4 text-lg">{title}</h2>}
+      {/* {title ? <FadeIn>{children}</FadeIn> : children} */}
       {children}
     </section>
   );
