@@ -1,19 +1,26 @@
-import { VariantProps, cva } from "class-variance-authority";
+import { type VariantProps, cva } from "class-variance-authority";
 
 import { cn } from "@/lib/utils";
-import { ComponentProps, forwardRef } from "react";
+import { ComponentProps, HTMLAttributes, forwardRef } from "react";
+import { Slot } from "@radix-ui/react-slot";
+import { LinkProps } from "next/link";
 
 const chipVariants = cva(
-  "text-center inline-flex items-center border rounded-full bg-card text-card-foreground shadow-sm",
+  "text-center inline-flex items-center rounded-full border",
   {
     variants: {
       size: {
-        sm: "text-xs px-2.5 py-0.5",
+        sm: "text-xs px-2 py-1",
         md: "text-base px-3 py-1",
+      },
+      clickable: {
+        true: "bg-card text-card-foreground shadow-sm cursor-pointer transition ease-in-out hover:-translate-y-1 hover:shadow-md",
+        false: "border-transparent bg-secondary text-secondary-foreground",
       },
     },
     defaultVariants: {
       size: "md",
+      clickable: true,
     },
   }
 );
@@ -34,16 +41,16 @@ const iconVariants = cva(
 );
 
 export interface ChipProps
-  extends ComponentProps<"li">,
+  extends HTMLAttributes<HTMLLIElement>,
     VariantProps<typeof chipVariants> {
   icon?: React.ReactNode;
 }
 
 const Chip = forwardRef<HTMLLIElement, ChipProps>(
-  ({ className, size, icon, children, ...props }, ref) => {
+  ({ className, size, icon, clickable, children, ...props }, ref) => {
     return (
       <li
-        className={cn(chipVariants({ size }), className)}
+        className={cn(chipVariants({ size, clickable }), className)}
         ref={ref}
         {...props}
       >
@@ -71,4 +78,21 @@ Chip.displayName = "Chip";
 //   },
 // };
 
-export { Chip, chipVariants };
+export interface ChipGroupProps extends HTMLAttributes<HTMLUListElement> {}
+
+const ChipGroup = forwardRef<HTMLUListElement, ChipGroupProps>(
+  ({ className, children, ...props }, ref) => {
+    return (
+      <ul
+        className={cn("flex gap-2 flex-wrap", className)}
+        ref={ref}
+        {...props}
+      >
+        {children}
+      </ul>
+    );
+  }
+);
+ChipGroup.displayName = "ChipGroup";
+
+export { Chip, ChipGroup };

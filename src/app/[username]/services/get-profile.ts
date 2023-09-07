@@ -7,6 +7,7 @@ export const getProfile = cache(async (username: string) => {
   return await prisma.profiles.findUnique({
     where: { username },
     include: {
+      users: true,
       profiles_groups: {
         include: {
           groups: {
@@ -24,12 +25,28 @@ export const getProfile = cache(async (username: string) => {
       residence_histories: true,
       educations: {
         include: {
-          schools: true,
+          schools: {
+            include: {
+              educations: {
+                include: {
+                  profiles: true,
+                },
+              },
+            },
+          },
         },
       },
       experiences: {
         include: {
-          companies: true,
+          companies: {
+            include: {
+              experiences: {
+                include: {
+                  profiles: true,
+                },
+              },
+            },
+          },
         },
       },
       profiles_badges: {
@@ -41,6 +58,7 @@ export const getProfile = cache(async (username: string) => {
           },
         },
       },
+      profiles_contacts: true,
     },
   });
 });
