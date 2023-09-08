@@ -8,7 +8,7 @@ const bubbleVariants = cva(
     variants: {
       last: {
         true: "",
-        false: "before:content-none after:content-none",
+        false: "before:hidden after:hidden overflow-hidden",
       },
       left: {
         true: "ml-2 bg-secondary text-secondary-foreground before:content-[''] before:absolute before:z-0 before:bottom-0 before:left-[-7px] before:h-[20px] before:w-[20px] before:bg-secondary before:rounded-br-[15px] after:content-[''] after:absolute after:z-10 after:bottom-0 after:left-[-10px] after:h-[20px] after:w-[10px] after:bg-background after:rounded-br-[10px]",

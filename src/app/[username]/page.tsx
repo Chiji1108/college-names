@@ -24,6 +24,7 @@ import { getProfiles } from "./services/get-profiles";
 import { getProfile } from "./services/get-profile";
 import { History, HistoryGroup } from "@/components/history";
 import { Bubble, Message } from "@/components/message";
+import { Button } from "@/components/ui/button";
 
 export async function generateStaticParams() {
   const profiles = await getProfiles();
@@ -65,7 +66,7 @@ export default async function Page({
 
   return (
     <div className="mx-auto w-full px-4.5 xs:px-6 sm:px-10 md:px-11 lg:px-12 max-w-2xl">
-      <header className="h-[128px] sm:rounded-b-xl sm:overflow-hidden shadow-inner sm:mx-6">
+      <header className="h-[128px] sm:rounded-b-xl sm:overflow-hidden sm:mx-6">
         <Image
           src="https://picsum.photos/1600/900"
           alt="header"
@@ -342,14 +343,16 @@ export default async function Page({
             <p className="text-center">所属しているグループはありません。</p>
           )}
         </Section>
-        <Section className="sm:overflow-hidden sm:rounded-lg sm:mx-6 mx-0 shadow-inner snap-center">
-          <Image
-            src="https://picsum.photos/900/1200"
-            alt="image1"
-            width={900}
-            height={1200}
-            className="object-cover object-center hover:scale-110 ease-in-out transition"
-          />
+        <Section className="mx-0">
+          <div className="sm:overflow-hidden sm:rounded-lg sm:mx-6">
+            <Image
+              src="https://picsum.photos/900/1200"
+              alt="image1"
+              width={900}
+              height={1200}
+              className="object-cover object-center"
+            />
+          </div>
         </Section>
         {interests.length > 0 && (
           <Section icon="🏄" title="Interests">
@@ -393,13 +396,13 @@ export default async function Page({
             </ChipGroup>
           </Section>
         )}
-        <Section className="sm:overflow-hidden sm:rounded-lg sm:mx-6 mx-0 shadow-inner snap-center">
+        <Section className="sm:overflow-hidden sm:rounded-lg sm:mx-6 mx-0">
           <Image
             src="https://picsum.photos/1024/1024"
             alt="image2"
             width={1024}
             height={1024}
-            className="object-cover object-center hover:scale-110 ease-in-out transition"
+            className="object-cover object-center"
           />
         </Section>
         {profile.educations && (
@@ -516,37 +519,40 @@ export default async function Page({
             </HistoryGroup>
           </Section>
         )}
-        <Section className="sm:overflow-hidden sm:rounded-lg sm:mx-6 mx-0 shadow-inner snap-center">
+        <Section className="sm:overflow-hidden sm:rounded-lg sm:mx-6 mx-0">
           <Image
             src="https://picsum.photos/1200/1200"
             alt="image3"
             width={1200}
             height={1200}
-            className="object-cover object-center hover:scale-110 ease-in-out transition"
+            className="object-cover object-center"
           />
         </Section>
-        <Section icon="💬" title="Q&A">
-          <div className="flex flex-col gap-2">
-            <Message left={false}>
-              <Bubble left={false}>Youは何しにカレッジへ？</Bubble>
-            </Message>
-            <Message>
-              <Avatar>
-                <AvatarImage
-                  src={profile.avatar_url || undefined}
-                  alt={profile.nick_name || profile.full_name}
-                  className="object-cover"
-                  width={300}
-                  height={300}
-                />
-                <AvatarFallback>
-                  {(profile.nick_name || profile.full_name).substring(0, 1)}
-                </AvatarFallback>
-              </Avatar>
-              <Bubble>寮生活が楽しそうだったから！</Bubble>
-            </Message>
-          </div>
-          <CardGroup>
+        <Section icon="💬" title="Q&A" cta={<Button>質問する</Button>}>
+          <Card className="p-6">
+            <div className="flex flex-col gap-2">
+              <Message left={false}>
+                <Bubble left={false}>Youは何しにカレッジへ？</Bubble>
+              </Message>
+              <Message>
+                <Avatar>
+                  <AvatarImage
+                    src={profile.avatar_url || undefined}
+                    alt={profile.nick_name || profile.full_name}
+                    className="object-cover"
+                    width={300}
+                    height={300}
+                  />
+                  <AvatarFallback>
+                    {(profile.nick_name || profile.full_name).substring(0, 1)}
+                  </AvatarFallback>
+                </Avatar>
+                <Bubble>寮生活が楽しそうだったから！</Bubble>
+              </Message>
+              {/* <HeartCount count={0} hearted={false} /> */}
+            </div>
+          </Card>
+          {/* <CardGroup>
             <Card className="p-6">
               <p className="text-sm text-muted-foreground mb-0.5">
                 Youは何しにカレッジへ？
@@ -565,15 +571,15 @@ export default async function Page({
               </p>
               <p>心理的安全性</p>
             </Card>
-          </CardGroup>
+          </CardGroup> */}
         </Section>
-        <Section className="sm:overflow-hidden sm:rounded-lg sm:mx-6 mx-0 shadow-inner snap-center">
+        <Section className="sm:overflow-hidden sm:rounded-lg sm:mx-6 mx-0">
           <Image
             src="https://picsum.photos/900/900"
             alt="image4"
             width={900}
             height={900}
-            className="object-cover object-center hover:scale-110 ease-in-out transition"
+            className="object-cover object-center"
           />
         </Section>
         {profile.profiles_contacts && (
@@ -678,6 +684,9 @@ export default async function Page({
             </ChipGroup>
           </Section>
         )}
+        <Section icon="👀" title="おすすめのユーザー">
+          <div>ちょっと待ってね</div>
+        </Section>
       </article>
       <footer className="mt-16 grid place-content-center text-sm text-muted-foreground py-8">
         &#169; College App
@@ -689,16 +698,27 @@ export default async function Page({
 interface SectionProps extends ComponentProps<"section"> {
   icon?: string;
   title?: string;
+  cta?: React.ReactNode;
 }
 
-function Section({ icon, title, children, className, ...props }: SectionProps) {
+function Section({
+  icon,
+  title,
+  cta,
+  children,
+  className,
+  ...props
+}: SectionProps) {
   return (
     <section className={cn("mx-6", className)} {...props}>
-      {(icon || title) && (
-        <h2 className="font-black mb-4 text-2xl flex gap-2">
-          {icon && <span>{icon}</span>}
-          {title && <span>{title}</span>}
-        </h2>
+      {(icon || title || cta) && (
+        <div className="flex justify-between">
+          <div className="font-black mb-4 text-2xl flex gap-2">
+            {icon && <span>{icon}</span>}
+            {title && <h2>{title}</h2>}
+          </div>
+          {cta && <div>{cta}</div>}
+        </div>
       )}
       {/* {title ? <FadeIn>{children}</FadeIn> : children} */}
       {children}
