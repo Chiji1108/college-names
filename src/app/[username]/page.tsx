@@ -23,7 +23,7 @@ import { Separator } from "@/components/ui/separator";
 import { getProfiles } from "./services/get-profiles";
 import { getProfile } from "./services/get-profile";
 import { History, HistoryGroup } from "@/components/history";
-// import { FadeIn } from "@/components/fade-in";
+import { Bubble, Message } from "@/components/message";
 
 export async function generateStaticParams() {
   const profiles = await getProfiles();
@@ -481,6 +481,7 @@ export default async function Page({
                       }),
                       { locale: ja, format: ["years", "months"] }
                     ).replace(/ /g, "")})`}
+                    items={experience.details}
                     avatar={
                       <AvatarGroup max={5}>
                         {experience.companies.experiences.map((member) => (
@@ -525,6 +526,26 @@ export default async function Page({
           />
         </Section>
         <Section icon="💬" title="Q&A">
+          <div className="flex flex-col gap-2">
+            <Message left={false}>
+              <Bubble left={false}>Youは何しにカレッジへ？</Bubble>
+            </Message>
+            <Message>
+              <Avatar>
+                <AvatarImage
+                  src={profile.avatar_url || undefined}
+                  alt={profile.nick_name || profile.full_name}
+                  className="object-cover"
+                  width={300}
+                  height={300}
+                />
+                <AvatarFallback>
+                  {(profile.nick_name || profile.full_name).substring(0, 1)}
+                </AvatarFallback>
+              </Avatar>
+              <Bubble>寮生活が楽しそうだったから！</Bubble>
+            </Message>
+          </div>
           <CardGroup>
             <Card className="p-6">
               <p className="text-sm text-muted-foreground mb-0.5">
