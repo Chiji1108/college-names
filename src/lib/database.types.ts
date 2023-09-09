@@ -9,6 +9,40 @@ export type Json =
 export interface Database {
   public: {
     Tables: {
+      answers: {
+        Row: {
+          answered_at: string
+          body: string | null
+          question_id: number
+          user_id: string
+        }
+        Insert: {
+          answered_at?: string
+          body?: string | null
+          question_id: number
+          user_id?: string
+        }
+        Update: {
+          answered_at?: string
+          body?: string | null
+          question_id?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "answers_question_id_fkey"
+            columns: ["question_id"]
+            referencedRelation: "questions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "answers_user_id_fkey"
+            columns: ["user_id"]
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
       badge_categories: {
         Row: {
           created_at: string | null
@@ -86,42 +120,54 @@ export interface Database {
         }
         Relationships: []
       }
+      drinkings: {
+        Row: {
+          id: number
+          name: string
+        }
+        Insert: {
+          id?: number
+          name: string
+        }
+        Update: {
+          id?: number
+          name?: string
+        }
+        Relationships: []
+      }
       educations: {
         Row: {
           activities_and_societies: string[] | null
-          details: string | null
-          end_date: string | null
-          profile_id: string
+          faculty: string | null
+          graduation_date: string
           school_id: number
-          start_date: string | null
+          user_id: string
         }
         Insert: {
           activities_and_societies?: string[] | null
-          details?: string | null
-          end_date?: string | null
-          profile_id: string
+          faculty?: string | null
+          graduation_date: string
           school_id: number
-          start_date?: string | null
+          user_id?: string
         }
         Update: {
           activities_and_societies?: string[] | null
-          details?: string | null
-          end_date?: string | null
-          profile_id?: string
+          faculty?: string | null
+          graduation_date?: string
           school_id?: number
-          start_date?: string | null
+          user_id?: string
         }
         Relationships: [
-          {
-            foreignKeyName: "educations_profile_id_fkey"
-            columns: ["profile_id"]
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "educations_school_id_fkey"
             columns: ["school_id"]
             referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "educations_user_id_fkey"
+            columns: ["user_id"]
+            referencedRelation: "users"
             referencedColumns: ["id"]
           }
         ]
@@ -130,23 +176,26 @@ export interface Database {
         Row: {
           company_id: number
           end_date: string | null
-          profile_id: string
-          start_date: string | null
-          title: string | null
+          position: string
+          projects_and_skills: string[] | null
+          start_date: string
+          user_id: string
         }
         Insert: {
           company_id: number
           end_date?: string | null
-          profile_id: string
-          start_date?: string | null
-          title?: string | null
+          position: string
+          projects_and_skills?: string[] | null
+          start_date: string
+          user_id?: string
         }
         Update: {
           company_id?: number
           end_date?: string | null
-          profile_id?: string
-          start_date?: string | null
-          title?: string | null
+          position?: string
+          projects_and_skills?: string[] | null
+          start_date?: string
+          user_id?: string
         }
         Relationships: [
           {
@@ -156,73 +205,86 @@ export interface Database {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "experiences_profile_id_fkey"
-            columns: ["profile_id"]
-            referencedRelation: "profiles"
+            foreignKeyName: "experiences_user_id_fkey"
+            columns: ["user_id"]
+            referencedRelation: "users"
             referencedColumns: ["id"]
           }
         ]
       }
       group_categories: {
         Row: {
-          can_change_join_status: boolean
-          can_join: Database["public"]["Enums"]["availability"]
-          can_leave: Database["public"]["Enums"]["availability"]
           created_at: string | null
           id: number
+          is_editable: boolean
+          is_noteworthy: boolean
+          join_type: Database["public"]["Enums"]["availability"]
           name: string
+          parent_id: number | null
           slug: string
         }
         Insert: {
-          can_change_join_status?: boolean
-          can_join: Database["public"]["Enums"]["availability"]
-          can_leave: Database["public"]["Enums"]["availability"]
           created_at?: string | null
           id?: number
+          is_editable?: boolean
+          is_noteworthy?: boolean
+          join_type?: Database["public"]["Enums"]["availability"]
           name: string
+          parent_id?: number | null
           slug: string
         }
         Update: {
-          can_change_join_status?: boolean
-          can_join?: Database["public"]["Enums"]["availability"]
-          can_leave?: Database["public"]["Enums"]["availability"]
           created_at?: string | null
           id?: number
+          is_editable?: boolean
+          is_noteworthy?: boolean
+          join_type?: Database["public"]["Enums"]["availability"]
           name?: string
+          parent_id?: number | null
           slug?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "group_categories_parent_id_fkey"
+            columns: ["parent_id"]
+            referencedRelation: "group_categories"
+            referencedColumns: ["id"]
+          }
+        ]
       }
       groups: {
         Row: {
           category_id: number
           created_at: string | null
-          from: string | null
+          end_date: string | null
           full_name: string | null
           id: number
+          image_url: string | null
           name: string
           slack_channel: string | null
-          to: string | null
+          start_date: string | null
         }
         Insert: {
           category_id: number
           created_at?: string | null
-          from?: string | null
+          end_date?: string | null
           full_name?: string | null
           id?: number
+          image_url?: string | null
           name: string
           slack_channel?: string | null
-          to?: string | null
+          start_date?: string | null
         }
         Update: {
           category_id?: number
           created_at?: string | null
-          from?: string | null
+          end_date?: string | null
           full_name?: string | null
           id?: number
+          image_url?: string | null
           name?: string
           slack_channel?: string | null
-          to?: string | null
+          start_date?: string | null
         }
         Relationships: [
           {
@@ -233,178 +295,186 @@ export interface Database {
           }
         ]
       }
-      profiles: {
+      mbti: {
         Row: {
-          avatar_url: string | null
-          bio_tags: string[] | null
-          full_name: string | null
-          id: string
-          nick_name: string | null
-          post_number: string | null
-          room_number: string | null
-          updated_at: string | null
-          username: string | null
+          id: number
+          name: string
         }
         Insert: {
-          avatar_url?: string | null
-          bio_tags?: string[] | null
-          full_name?: string | null
-          id?: string
-          nick_name?: string | null
-          post_number?: string | null
-          room_number?: string | null
-          updated_at?: string | null
-          username?: string | null
+          id?: number
+          name: string
         }
         Update: {
-          avatar_url?: string | null
-          bio_tags?: string[] | null
-          full_name?: string | null
-          id?: string
-          nick_name?: string | null
-          post_number?: string | null
-          room_number?: string | null
-          updated_at?: string | null
-          username?: string | null
+          id?: number
+          name?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "profiles_id_fkey"
-            columns: ["id"]
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          }
-        ]
+        Relationships: []
       }
-      profiles_badges: {
-        Row: {
-          badge_id: number
-          profile_id: string
-        }
-        Insert: {
-          badge_id: number
-          profile_id: string
-        }
-        Update: {
-          badge_id?: number
-          profile_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "profiles_badges_badge_id_fkey"
-            columns: ["badge_id"]
-            referencedRelation: "badges"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "profiles_badges_profile_id_fkey"
-            columns: ["profile_id"]
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          }
-        ]
-      }
-      profiles_contacts: {
-        Row: {
-          email: string | null
-          facebook: string | null
-          instagram: string | null
-          linkedin: string | null
-          paypay: string | null
-          profile_id: string
-          twitter: string | null
-          web: string | null
-        }
-        Insert: {
-          email?: string | null
-          facebook?: string | null
-          instagram?: string | null
-          linkedin?: string | null
-          paypay?: string | null
-          profile_id: string
-          twitter?: string | null
-          web?: string | null
-        }
-        Update: {
-          email?: string | null
-          facebook?: string | null
-          instagram?: string | null
-          linkedin?: string | null
-          paypay?: string | null
-          profile_id?: string
-          twitter?: string | null
-          web?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "profiles_contacts_profile_id_fkey"
-            columns: ["profile_id"]
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          }
-        ]
-      }
-      profiles_groups: {
+      members: {
         Row: {
           group_id: number
-          profile_id: string
+          position: string | null
+          user_id: string
         }
         Insert: {
           group_id: number
-          profile_id: string
+          position?: string | null
+          user_id?: string
         }
         Update: {
           group_id?: number
-          profile_id?: string
+          position?: string | null
+          user_id?: string
         }
         Relationships: [
           {
-            foreignKeyName: "profiles_groups_group_id_fkey"
+            foreignKeyName: "members_group_id_fkey"
             columns: ["group_id"]
             referencedRelation: "groups"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "profiles_groups_profile_id_fkey"
-            columns: ["profile_id"]
-            referencedRelation: "profiles"
+            foreignKeyName: "members_user_id_fkey"
+            columns: ["user_id"]
+            referencedRelation: "users"
             referencedColumns: ["id"]
           }
         ]
       }
-      residence_histories: {
+      personalities: {
+        Row: {
+          badge_id: number
+          user_id: string
+        }
+        Insert: {
+          badge_id: number
+          user_id?: string
+        }
+        Update: {
+          badge_id?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "personalities_badge_id_fkey"
+            columns: ["badge_id"]
+            referencedRelation: "badges"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "personalities_user_id_fkey"
+            columns: ["user_id"]
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      politics: {
+        Row: {
+          created_at: string
+          id: number
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          id?: number
+          name: string
+        }
+        Update: {
+          created_at?: string
+          id?: number
+          name?: string
+        }
+        Relationships: []
+      }
+      questions: {
+        Row: {
+          body: string
+          created_at: string
+          id: number
+          receiver_id: string | null
+          sender_id: string | null
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          id?: number
+          receiver_id?: string | null
+          sender_id?: string | null
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          id?: number
+          receiver_id?: string | null
+          sender_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "questions_receiver_id_fkey"
+            columns: ["receiver_id"]
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "questions_sender_id_fkey"
+            columns: ["sender_id"]
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      religions: {
+        Row: {
+          created_at: string
+          id: number
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          id?: number
+          name: string
+        }
+        Update: {
+          created_at?: string
+          id?: number
+          name?: string
+        }
+        Relationships: []
+      }
+      residential_histories: {
         Row: {
           id: number
           move_in_date: string | null
           move_out_date: string | null
-          profile_id: string
           program_id: number | null
+          user_id: string
         }
         Insert: {
           id?: number
           move_in_date?: string | null
           move_out_date?: string | null
-          profile_id: string
           program_id?: number | null
+          user_id?: string
         }
         Update: {
           id?: number
           move_in_date?: string | null
           move_out_date?: string | null
-          profile_id?: string
           program_id?: number | null
+          user_id?: string
         }
         Relationships: [
           {
-            foreignKeyName: "residence_histories_profile_id_fkey"
-            columns: ["profile_id"]
-            referencedRelation: "profiles"
+            foreignKeyName: "residential_histories_program_id_fkey"
+            columns: ["program_id"]
+            referencedRelation: "groups"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "residence_histories_program_id_fkey"
-            columns: ["program_id"]
-            referencedRelation: "groups"
+            foreignKeyName: "residential_histories_user_id_fkey"
+            columns: ["user_id"]
+            referencedRelation: "users"
             referencedColumns: ["id"]
           }
         ]
@@ -426,6 +496,142 @@ export interface Database {
           name?: string
         }
         Relationships: []
+      }
+      smokings: {
+        Row: {
+          id: number
+          name: string
+        }
+        Insert: {
+          id?: number
+          name: string
+        }
+        Update: {
+          id?: number
+          name?: string
+        }
+        Relationships: []
+      }
+      users: {
+        Row: {
+          avatar_url: string | null
+          bio_tags: string[] | null
+          created_at: string
+          date_of_birth: string | null
+          drinking_id: number | null
+          email: string | null
+          facebook: string | null
+          id: string
+          instagram: string | null
+          is_admin: boolean
+          linkedin: string | null
+          mbti_id: number | null
+          name: string
+          nick_name: string | null
+          paypay: string | null
+          politics_id: number | null
+          post_number: string | null
+          religion_id: number | null
+          room_number: string | null
+          slack_channel: string | null
+          smoking_id: number | null
+          twitter: string | null
+          updated_at: string | null
+          username: string
+          website: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          bio_tags?: string[] | null
+          created_at?: string
+          date_of_birth?: string | null
+          drinking_id?: number | null
+          email?: string | null
+          facebook?: string | null
+          id?: string
+          instagram?: string | null
+          is_admin?: boolean
+          linkedin?: string | null
+          mbti_id?: number | null
+          name: string
+          nick_name?: string | null
+          paypay?: string | null
+          politics_id?: number | null
+          post_number?: string | null
+          religion_id?: number | null
+          room_number?: string | null
+          slack_channel?: string | null
+          smoking_id?: number | null
+          twitter?: string | null
+          updated_at?: string | null
+          username: string
+          website?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          bio_tags?: string[] | null
+          created_at?: string
+          date_of_birth?: string | null
+          drinking_id?: number | null
+          email?: string | null
+          facebook?: string | null
+          id?: string
+          instagram?: string | null
+          is_admin?: boolean
+          linkedin?: string | null
+          mbti_id?: number | null
+          name?: string
+          nick_name?: string | null
+          paypay?: string | null
+          politics_id?: number | null
+          post_number?: string | null
+          religion_id?: number | null
+          room_number?: string | null
+          slack_channel?: string | null
+          smoking_id?: number | null
+          twitter?: string | null
+          updated_at?: string | null
+          username?: string
+          website?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "users_drinking_id_fkey"
+            columns: ["drinking_id"]
+            referencedRelation: "drinkings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "users_id_fkey"
+            columns: ["id"]
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "users_mbti_id_fkey"
+            columns: ["mbti_id"]
+            referencedRelation: "mbti"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "users_politics_id_fkey"
+            columns: ["politics_id"]
+            referencedRelation: "politics"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "users_religion_id_fkey"
+            columns: ["religion_id"]
+            referencedRelation: "religions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "users_smoking_id_fkey"
+            columns: ["smoking_id"]
+            referencedRelation: "smokings"
+            referencedColumns: ["id"]
+          }
+        ]
       }
     }
     Views: {
