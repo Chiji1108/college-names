@@ -89,6 +89,8 @@ export default async function Page({
     )
     .eq("username", params.username)
     .maybeSingle();
+
+  if (error) throw error;
   // const profile = await getProfile(params.username);
   // console.log(parseISO(user?.residential_histories), error);
 
