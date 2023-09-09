@@ -36,7 +36,10 @@ import { container } from "@/styles/layouts";
 export const revalidate = 3600;
 
 export async function generateStaticParams() {
-  const { data: users } = await supabaseAdmin.from("users").select("username");
+  const { data: users, error } = await supabaseAdmin
+    .from("users")
+    .select("username");
+  if (error) throw error;
   return users?.map(({ username }) => ({ username }));
 }
 
