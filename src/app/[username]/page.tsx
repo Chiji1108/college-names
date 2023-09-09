@@ -40,7 +40,7 @@ export async function generateStaticParams() {
     .from("users")
     .select("username");
   if (error) throw error;
-  return users?.map(({ username }) => ({ username }));
+  return users.map(({ username }) => ({ username }));
 }
 
 export default async function Page({
