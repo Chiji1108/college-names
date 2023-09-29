@@ -11,7 +11,7 @@ const HistoryGroup = forwardRef<HTMLDivElement, HistoryGroupProps>(
         <div
           ref={ref}
           className={cn(
-            "border-l-2 border-border flex flex-col pl-6 gap-11 ml-4 mt-8 pb-2",
+            "border-l-2 border-border flex flex-col pl-6 gap-12 ml-4 mt-8 pb-2",
             className
           )}
           {...props}
@@ -46,7 +46,7 @@ const History = forwardRef<HTMLDivElement, HistoryProps>(
           </div>
           <div className="text-muted-foreground">{timestamp}</div>
         </div>
-        <div className="flex flex-col gap-1 mt-7">
+        <div className="flex flex-col gap-1 mt-6">
           <div className="flex justify-between rounded-lg overflow-hidden hover:bg-accent transition px-4 py-2 -ml-4 -mt-2 cursor-pointer">
             <div className="flex flex-col justify-center">
               <h4 className="font-bold text-lg leading-tight">{title}</h4>

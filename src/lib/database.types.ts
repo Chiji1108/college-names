@@ -14,18 +14,24 @@ export interface Database {
           answered_at: string
           body: string | null
           question_id: number
+          reaction_id: number
+          use_on_bio: boolean
           user_id: string
         }
         Insert: {
           answered_at?: string
           body?: string | null
           question_id: number
+          reaction_id: number
+          use_on_bio?: boolean
           user_id?: string
         }
         Update: {
           answered_at?: string
           body?: string | null
           question_id?: number
+          reaction_id?: number
+          use_on_bio?: boolean
           user_id?: string
         }
         Relationships: [
@@ -33,6 +39,12 @@ export interface Database {
             foreignKeyName: "answers_question_id_fkey"
             columns: ["question_id"]
             referencedRelation: "questions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "answers_reaction_id_fkey"
+            columns: ["reaction_id"]
+            referencedRelation: "reactions"
             referencedColumns: ["id"]
           },
           {
@@ -369,6 +381,52 @@ export interface Database {
           }
         ]
       }
+      photos: {
+        Row: {
+          caption: string | null
+          created_at: string
+          height: number
+          id: number
+          image_url: string
+          reaction_id: number
+          user_id: string
+          width: number
+        }
+        Insert: {
+          caption?: string | null
+          created_at?: string
+          height: number
+          id?: number
+          image_url: string
+          reaction_id: number
+          user_id?: string
+          width: number
+        }
+        Update: {
+          caption?: string | null
+          created_at?: string
+          height?: number
+          id?: number
+          image_url?: string
+          reaction_id?: number
+          user_id?: string
+          width?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "photos_reaction_id_fkey"
+            columns: ["reaction_id"]
+            referencedRelation: "reactions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "photos_user_id_fkey"
+            columns: ["user_id"]
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
       politics: {
         Row: {
           created_at: string
@@ -423,6 +481,55 @@ export interface Database {
             referencedColumns: ["id"]
           }
         ]
+      }
+      reaction_items: {
+        Row: {
+          created_at: string
+          emoji: string
+          reaction_id: number
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          emoji: string
+          reaction_id: number
+          user_id?: string
+        }
+        Update: {
+          created_at?: string
+          emoji?: string
+          reaction_id?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reaction_items_reaction_id_fkey"
+            columns: ["reaction_id"]
+            referencedRelation: "reactions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reaction_items_user_id_fkey"
+            columns: ["user_id"]
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      reactions: {
+        Row: {
+          created_at: string
+          id: number
+        }
+        Insert: {
+          created_at?: string
+          id?: number
+        }
+        Update: {
+          created_at?: string
+          id?: number
+        }
+        Relationships: []
       }
       religions: {
         Row: {
@@ -521,13 +628,14 @@ export interface Database {
           drinking_id: number | null
           email: string | null
           facebook: string | null
+          full_name: string | null
+          header_url: string | null
           id: string
           instagram: string | null
           is_admin: boolean
           linkedin: string | null
           mbti_id: number | null
           name: string
-          nick_name: string | null
           paypay: string | null
           politics_id: number | null
           post_number: string | null
@@ -548,13 +656,14 @@ export interface Database {
           drinking_id?: number | null
           email?: string | null
           facebook?: string | null
+          full_name?: string | null
+          header_url?: string | null
           id?: string
           instagram?: string | null
           is_admin?: boolean
           linkedin?: string | null
           mbti_id?: number | null
           name: string
-          nick_name?: string | null
           paypay?: string | null
           politics_id?: number | null
           post_number?: string | null
@@ -564,7 +673,7 @@ export interface Database {
           smoking_id?: number | null
           twitter?: string | null
           updated_at?: string | null
-          username: string
+          username?: string
           website?: string | null
         }
         Update: {
@@ -575,13 +684,14 @@ export interface Database {
           drinking_id?: number | null
           email?: string | null
           facebook?: string | null
+          full_name?: string | null
+          header_url?: string | null
           id?: string
           instagram?: string | null
           is_admin?: boolean
           linkedin?: string | null
           mbti_id?: number | null
           name?: string
-          nick_name?: string | null
           paypay?: string | null
           politics_id?: number | null
           post_number?: string | null
@@ -638,7 +748,12 @@ export interface Database {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      generate_unique_username: {
+        Args: {
+          email: string
+        }
+        Returns: string
+      }
     }
     Enums: {
       availability: "allowed" | "approval required" | "not allowed"

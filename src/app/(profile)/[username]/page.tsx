@@ -1,99 +1,49 @@
-import { Chip, ChipGroup } from "@/components/chip";
+import { getProfile } from "@/app/api/fetcher/get-profile";
+import { notFound } from "next/navigation";
+import {
+  format,
+  formatDistanceToNow,
+  formatDuration,
+  intervalToDuration,
+  intlFormatDistance,
+  parseISO,
+} from "date-fns";
+import { container } from "@/styles/layouts";
+import Image from "next/image";
+import { Badge } from "@/components/ui/badge";
+import { Fragment, HTMLAttributes, forwardRef } from "react";
 import { cn } from "@/lib/utils";
-
+import { Separator } from "@/components/ui/separator";
+import { ja } from "date-fns/locale";
+import { Chip, ChipGroup } from "@/components/chip";
+import Link from "next/link";
 import {
   Facebook,
   Globe,
   Instagram,
   Linkedin,
   Mail,
-  Slack,
   Twitter,
 } from "lucide-react";
-import { notFound } from "next/navigation";
-import Image from "next/image";
-import Link from "next/link";
-import { ja } from "date-fns/locale";
-import {
-  format,
-  formatDuration,
-  intervalToDuration,
-  parseISO,
-  formatDistanceToNow,
-} from "date-fns";
-import { Badge } from "@/components/ui/badge";
-import { AvatarGroup } from "@/components/avatar-group";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { ComponentProps, Fragment, forwardRef } from "react";
-import { Separator } from "@/components/ui/separator";
-import { History, HistoryGroup } from "@/components/history";
 import { Bubble, Message } from "@/components/message";
-import { Button } from "@/components/ui/button";
-import { supabaseAdmin } from "@/lib/supabase";
-import { BADGE_CATEGORY } from "./const";
-import { container } from "@/styles/layouts";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { HistoryGroup, History } from "@/components/history";
+import { AvatarGroup } from "@/components/avatar-group";
+import ReactionBar from "@/components/reaction/reaction-bar";
 
-export const revalidate = 3600;
-
-export async function generateStaticParams() {
-  const { data: users, error } = await supabaseAdmin
-    .from("users")
-    .select("username");
-  if (error) throw error;
-  return users.map(({ username }) => ({ username }));
-}
-
+const BADGE_CATEGORY = {
+  COLLEGE_SKILL: 3,
+  INTEREST: 1,
+  LIFESTAGE: 2,
+  SPOKEN_LANGUAGE: 4,
+};
 export default async function Page({
   params,
 }: {
   params: { username: string };
 }) {
-  const { data: user, error } = await supabaseAdmin
-    .from("users")
-    .select(
-      `
-    *,
-    badges (
-      *,
-      badge_categories (*)
-    ),
-    residential_histories (*),
-    groups (
-      *,
-      group_categories (*),
-      users (*)
-    ),
-    members (
-      *
-    ),
-    mbti (*),
-    drinkings (*),
-    smokings (*),
-    politics (*),
-    religions (*),
-    educations (
-      *,
-      schools (
-        *,
-        users (*)
-      )
-    ),
-    experiences (
-      *,
-      companies (
-        *,
-        users (*)
-      )
-    )
-    `
-    )
-    .eq("username", params.username)
-    .maybeSingle();
-
-  if (error) throw error;
-  // const profile = await getProfile(params.username);
-  // console.log(parseISO(user?.residential_histories), error);
-
+  const { username } = params;
+  const user = await getProfile({ username });
   if (!user) notFound();
 
   const college_skills = user.badges.filter(
@@ -114,42 +64,45 @@ export default async function Page({
       parseISO(residential_history.move_out_date) < new Date()
   );
 
+  const notableAnswers = user.answers.filter((answer) => answer.use_on_bio);
+
+  const images = user.photos.sort((a, b) => {
+    if (a.created_at < b.created_at) return -1;
+    if (a.created_at > b.created_at) return 1;
+    return 0;
+  });
   return (
     <div>
       <div className={container}>
-        <header className="h-[128px] sm:rounded-b-xl sm:overflow-hidden sm:mx-6">
-          <Image
-            src="https://picsum.photos/1600/900"
-            alt="header"
-            width={1600}
-            height={900}
-            className="object-cover h-[128px] w-full"
-          />
+        <header className="h-[128px] sm:rounded-b-xl sm:overflow-hidden sm:mx-6 relative">
+          {user.header_url ? (
+            <Image
+              src={user.header_url}
+              alt={"header"}
+              fill
+              className="object-cover object-center h-[128px] w-full"
+            />
+          ) : (
+            <div className="h-[128px] w-full" />
+          )}
         </header>
         <article className="flex flex-col gap-24 snap-y">
           <section className="mx-6 -mt-[64px] flex flex-col items-center gap-2">
-            <div className="w-[128px] h-[128px] rounded-full overflow-hidden border-background border-4">
+            <div className="w-[128px] h-[128px] rounded-full overflow-hidden border-background border-4 relative">
               {user.avatar_url ? (
                 <Image
                   src={user.avatar_url}
-                  alt="avatar"
-                  className="object-cover"
-                  width={300}
-                  height={300}
+                  alt={"avatar"}
+                  className="object-cover object-center"
+                  fill
                 />
               ) : (
-                <Image
-                  src="https://i.pravatar.cc/300"
-                  alt="dummy"
-                  className="object-cover"
-                  width={300}
-                  height={300}
-                />
+                <div className="w-full h-full bg-secondary grid place-content-center text-4xl">
+                  👤
+                </div>
               )}
             </div>
-            <h1 className="font-bold text-2xl">
-              {user.nick_name || user.name}
-            </h1>
+            <h1 className="font-bold text-2xl">{user.name}</h1>
             <div className="mx-4 flex items-center gap-2 flex-wrap">
               {user.groups
                 .filter((group) => group.group_categories?.is_noteworthy)
@@ -170,9 +123,11 @@ export default async function Page({
           </section>
           <Section icon="👋" title="Profile">
             <ChipGroup>
-              <Chip icon="🪪" clickable={false}>
-                {user.name}
-              </Chip>
+              {user.full_name && (
+                <Chip icon="🪪" clickable={false}>
+                  {user.full_name}
+                </Chip>
+              )}
               {user.residential_histories.map((residential_history) => (
                 <Chip key={residential_history.id} icon="👣" clickable={false}>
                   {residential_history.move_in_date &&
@@ -215,7 +170,7 @@ export default async function Page({
           </Section>
           <Section icon="👥" title="Group">
             {user.groups.length > 0 ? (
-              <div className="flex flex-col gap-2">
+              <div className="flex flex-col">
                 {user.groups.map((group, i) => (
                   <Fragment key={group.id}>
                     {i > 0 && (
@@ -224,18 +179,19 @@ export default async function Page({
                         <Separator className="shrink" />
                       </div>
                     )}
-                    <div className="flex gap-4 cursor-pointer rounded-lg overflow-hidden hover:ring hover:ring-border hover:ring-offset-2 transition hover:-translate-y-1 ease-in-out">
-                      <div className="shrink-0 w-24 h-24 aspect-square rounded-lg overflow-hidden">
+                    <div className="flex gap-4 p-2 cursor-pointer rounded-lg overflow-hidden transition ease-in-out hover:bg-secondary">
+                      <div className="shrink-0 w-24 h-24 grid place-items-center">
                         {group.image_url ? (
-                          <Image
-                            src={group.image_url}
-                            width={1600}
-                            height={900}
-                            alt="thumbnail"
-                            className="object-cover"
-                          />
+                          <div className="aspect-square rounded-lg overflow-hidden w-full border-2 border-background">
+                            <Image
+                              src={group.image_url}
+                              fill
+                              alt="thumbnail"
+                              className="object-cover object-center"
+                            />
+                          </div>
                         ) : (
-                          <div className="w-full h-full bg-secondary grid place-content-center text-2xl">
+                          <div className="aspect-square rounded-lg overflow-hidden w-full border-2 border-background bg-secondary grid place-content-center text-2xl">
                             👥
                           </div>
                         )}
@@ -260,17 +216,14 @@ export default async function Page({
                               {member.avatar_url && (
                                 <AvatarImage
                                   src={member.avatar_url}
-                                  alt={member.nick_name || member.name}
-                                  className="object-cover"
+                                  alt={member.name}
+                                  className="object-cover object-center"
                                   width={300}
                                   height={300}
                                 />
                               )}
                               <AvatarFallback>
-                                {(member.nick_name || member.name).substring(
-                                  0,
-                                  1
-                                )}
+                                {member.name.substring(0, 1)}
                               </AvatarFallback>
                             </Avatar>
                           ))}
@@ -284,17 +237,20 @@ export default async function Page({
               <p className="text-center">所属しているグループはありません。</p>
             )}
           </Section>
-          {/* <Section className="mx-0">
-            <div className="sm:overflow-hidden sm:rounded-lg sm:mx-6">
-              <Image
-                src="https://picsum.photos/900/1200"
-                alt="image1"
-                width={900}
-                height={1200}
-                className="object-cover object-center"
-              />
-            </div>
-          </Section> */}
+          {images[0] && (
+            <Section className="mx-0 sm:mx-6 relative">
+              <div className="sm:overflow-hidden sm:rounded-lg ">
+                <Image
+                  src={images[0].image_url}
+                  alt={images[0].caption || "image1"}
+                  width={images[0].width}
+                  height={images[0].height}
+                  className="object-cover object-center"
+                />
+              </div>
+              <ReactionBar reactionId={images[0].reaction_id} />
+            </Section>
+          )}
           {interests.length > 0 && (
             <Section icon="🏄" title="Interests">
               <ChipGroup>
@@ -328,15 +284,20 @@ export default async function Page({
               </ChipGroup>
             </Section>
           )}
-          {/* <Section className="sm:overflow-hidden sm:rounded-lg sm:mx-6 mx-0">
-            <Image
-              src="https://picsum.photos/1024/1024"
-              alt="image2"
-              width={1024}
-              height={1024}
-              className="object-cover object-center"
-            />
-          </Section> */}
+          {images[1] && (
+            <Section className="mx-0 sm:mx-6 relative">
+              <div className="sm:overflow-hidden sm:rounded-lg">
+                <Image
+                  src={images[1].image_url}
+                  alt={images[1].caption || "image2"}
+                  width={images[1].width}
+                  height={images[1].height}
+                  className="object-cover object-center"
+                />
+              </div>
+              <ReactionBar reactionId={images[0].reaction_id} />
+            </Section>
+          )}
           {user.educations && (
             <Section icon="🎓" title="Education">
               <HistoryGroup>
@@ -373,17 +334,14 @@ export default async function Page({
                               {member.avatar_url && (
                                 <AvatarImage
                                   src={member.avatar_url}
-                                  alt={member.nick_name || member.name}
+                                  alt={member.name}
                                   className="object-cover"
                                   width={300}
                                   height={300}
                                 />
                               )}
                               <AvatarFallback>
-                                {(member.nick_name || member.name).substring(
-                                  0,
-                                  1
-                                )}
+                                {member.name.substring(0, 1)}
                               </AvatarFallback>
                             </Avatar>
                           ))}
@@ -437,17 +395,14 @@ export default async function Page({
                               {member.avatar_url && (
                                 <AvatarImage
                                   src={member.avatar_url}
-                                  alt={member.nick_name || member.name}
+                                  alt={member.name}
                                   className="object-cover"
                                   width={300}
                                   height={300}
                                 />
                               )}
                               <AvatarFallback>
-                                {(member.nick_name || member.name).substring(
-                                  0,
-                                  1
-                                )}
+                                {member.name.substring(0, 1)}
                               </AvatarFallback>
                             </Avatar>
                           ))}
@@ -458,53 +413,89 @@ export default async function Page({
               </HistoryGroup>
             </Section>
           )}
-          {/* <Section className="sm:overflow-hidden sm:rounded-lg sm:mx-6 mx-0">
-            <Image
-              src="https://picsum.photos/1200/1200"
-              alt="image3"
-              width={1200}
-              height={1200}
-              className="object-cover object-center"
-            />
-          </Section> */}
-          <Section
-            icon="💬"
-            title="Q&A"
-            cta={<Button className="rounded-full">質問する</Button>}
-          >
-            <Card className="p-6">
-              <div className="flex flex-col gap-2">
-                <Message left={false}>
-                  <Bubble left={false}>Youは何しにカレッジへ？</Bubble>
-                </Message>
-                <Message>
-                  <Avatar>
-                    <AvatarImage
-                      src={user.avatar_url || undefined}
-                      alt={user.nick_name || user.name}
-                      className="object-cover"
-                      width={300}
-                      height={300}
-                    />
-                    <AvatarFallback>
-                      {(user.nick_name || user.name).substring(0, 1)}
-                    </AvatarFallback>
-                  </Avatar>
-                  <Bubble>寮生活が楽しそうだったから！</Bubble>
-                </Message>
-                {/* <HeartCount count={0} hearted={false} /> */}
+          {images[2] && (
+            <Section className="mx-0 sm:mx-6 relative">
+              <div className="sm:overflow-hidden sm:rounded-lg">
+                <Image
+                  src={images[2].image_url}
+                  alt={images[2].caption || "image3"}
+                  width={images[2].width}
+                  height={images[2].height}
+                  className="object-cover object-center"
+                />
               </div>
-            </Card>
-          </Section>
-          {/* <Section className="sm:overflow-hidden sm:rounded-lg sm:mx-6 mx-0">
-            <Image
-              src="https://picsum.photos/900/900"
-              alt="image4"
-              width={900}
-              height={900}
-              className="object-cover object-center"
-            />
-          </Section> */}
+              <ReactionBar reactionId={images[0].reaction_id} />
+            </Section>
+          )}
+          {notableAnswers.length > 0 && (
+            <Section icon="💬" title="Q&A">
+              <div className="flex flex-col gap-16">
+                {notableAnswers
+                  .sort((a, b) => {
+                    if (parseISO(a.answered_at) < parseISO(b.answered_at))
+                      return -1;
+                    if (parseISO(a.answered_at) > parseISO(b.answered_at))
+                      return 1;
+                    return 0;
+                  })
+                  .map((answer) => (
+                    <div
+                      key={answer.question_id}
+                      className="flex flex-col gap-4 relative mb-4"
+                    >
+                      <div className="grid place-items-center">
+                        <span className="text-xs rounded-full py-1 px-2 bg-muted text-muted-foreground">
+                          {intlFormatDistance(
+                            parseISO(answer.answered_at),
+                            new Date(),
+                            { locale: "ja" }
+                          ).replace(/ /g, "")}{" "}
+                          {format(parseISO(answer.answered_at), "H:mm")}
+                        </span>
+                      </div>
+                      <div className="flex flex-col gap-2">
+                        <Message left={false}>
+                          <Bubble left={false}>{answer.questions!.body}</Bubble>
+                        </Message>
+                        {answer.body && (
+                          <Message>
+                            <Avatar>
+                              <AvatarImage
+                                src={user.avatar_url || undefined}
+                                alt={user.name}
+                                className="object-cover object-center"
+                                width={300}
+                                height={300}
+                              />
+                              <AvatarFallback>
+                                {user.name.substring(0, 1)}
+                              </AvatarFallback>
+                            </Avatar>
+                            <Bubble>{answer.body}</Bubble>
+                          </Message>
+                        )}
+                      </div>
+                      <ReactionBar reactionId={answer.reaction_id} />
+                    </div>
+                  ))}
+              </div>
+            </Section>
+          )}
+
+          {images[3] && (
+            <Section className="mx-0 sm:mx-6 relative">
+              <div className="sm:overflow-hidden sm:rounded-lg">
+                <Image
+                  src={images[3].image_url}
+                  alt={images[3].caption || "image4"}
+                  width={images[3].width}
+                  height={images[3].height}
+                  className="object-cover object-center"
+                />
+              </div>
+              <ReactionBar reactionId={images[0].reaction_id} />
+            </Section>
+          )}
           <Section icon="✉️" title="Contacts">
             <ChipGroup>
               {user.email && (
@@ -590,8 +581,9 @@ export default async function Page({
           <div className="mx-6 text-muted-foreground text-sm text-center">
             {formatDistanceToNow(parseISO(user.updated_at || user.created_at), {
               locale: ja,
+              addSuffix: true,
             })}
-            前に更新
+            に更新
           </div>
         </article>
         <Separator className="my-8" />
@@ -606,7 +598,7 @@ export default async function Page({
   );
 }
 
-interface SectionProps extends ComponentProps<"section"> {
+interface SectionProps extends HTMLAttributes<HTMLDivElement> {
   icon?: string;
   title?: string;
   cta?: React.ReactNode;
@@ -635,24 +627,4 @@ function Section({
       {children}
     </section>
   );
-}
-
-interface CardProps extends ComponentProps<"div"> {}
-
-function Card({ className, ...props }: CardProps) {
-  return (
-    <div
-      className={cn(
-        "rounded-lg border bg-card text-card-foreground shadow-sm hover:shadow-md transition ease-in-out hover:-translate-y-1",
-        className
-      )}
-      {...props}
-    />
-  );
-}
-
-interface CardGroupProps extends ComponentProps<"div"> {}
-
-function CardGroup({ className, ...props }: CardGroupProps) {
-  return <div className={cn("flex gap-4 flex-col", className)} {...props} />;
 }

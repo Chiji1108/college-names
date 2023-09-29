@@ -11,9 +11,9 @@ const bubbleVariants = cva(
         false: "before:hidden after:hidden overflow-hidden",
       },
       left: {
-        true: "ml-2 bg-secondary text-secondary-foreground before:content-[''] before:absolute before:z-0 before:bottom-0 before:left-[-7px] before:h-[20px] before:w-[20px] before:bg-secondary before:rounded-br-[15px] after:content-[''] after:absolute after:z-10 after:bottom-0 after:left-[-10px] after:h-[20px] after:w-[10px] after:bg-background after:rounded-br-[10px]",
+        true: "ml-2 bg-secondary text-secondary-foreground before:content-[''] before:absolute before:z-0 before:bottom-0 before:left-[-7px] before:h-[20px] before:w-[20px] before:bg-secondary before:rounded-br-[15px] after:content-[''] after:absolute after:bottom-0 after:left-[-10px] after:h-[20px] after:w-[10px] after:bg-background after:rounded-br-[10px]",
         false:
-          "mr-2 bg-green-500 text-white before:content-[''] before:absolute before:z-0 before:bottom-0 before:right-[-8px] before:w-[20px] before:h-[20px] before:bg-green-500 before:rounded-bl-[15px] after:content-[''] after:absolute after:z-10 after:bottom-0 after:right-[-10px] after:w-[10px] after:h-[20px] after:bg-background after:rounded-bl-[10px]",
+          "mr-2 bg-primary text-primary-foreground before:content-[''] before:absolute before:z-0 before:bottom-0 before:right-[-8px] before:w-[20px] before:h-[20px] before:bg-primary before:rounded-bl-[15px] after:content-[''] after:absolute after:bottom-0 after:right-[-10px] after:w-[10px] after:h-[20px] after:bg-background after:rounded-bl-[10px]",
       },
     },
     defaultVariants: {

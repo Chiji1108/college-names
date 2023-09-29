@@ -14,7 +14,7 @@ const chipVariants = cva(
         md: "text-base px-3 py-1",
       },
       clickable: {
-        true: "bg-card text-card-foreground shadow-sm cursor-pointer transition ease-in-out hover:-translate-y-1 hover:shadow-md",
+        true: "bg-card text-card-foreground cursor-pointer transition ease-in-out hover:bg-secondary",
         false: "border-transparent bg-secondary text-secondary-foreground",
       },
     },

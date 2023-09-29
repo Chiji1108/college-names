@@ -1,6 +1,0 @@
-export const BADGE_CATEGORY = {
-  COLLEGE_SKILL: 3,
-  INTEREST: 1,
-  LIFESTAGE: 2,
-  SPOKEN_LANGUAGE: 4,
-};
