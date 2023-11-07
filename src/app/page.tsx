@@ -1,9 +1,12 @@
 import Link from "next/link";
+import { auth } from "./api/auth/auth";
+import { LoginButton, LogoutButton } from "./api/auth/components/buttons";
 
 export default async function Home() {
+  const session = await auth();
   return (
-    <main>
-      <header className="mx-auto w-full px-4.5 xs:px-6 sm:px-10 md:px-11 lg:px-12 max-w-2xl">
+    <div className="mx-auto w-full px-4.5 xs:px-6 sm:px-10 md:px-11 lg:px-12 max-w-2xl">
+      {/* <header>
         <nav>
           <ul>
             <li>
@@ -14,7 +17,10 @@ export default async function Home() {
             </li>
           </ul>
         </nav>
-      </header>
-    </main>
+      </header> */}
+      <main>User: {session?.user?.email || "Not logged in"}</main>
+      <LoginButton />
+      <LogoutButton />
+    </div>
   );
 }
