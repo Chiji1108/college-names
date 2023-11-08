@@ -1,12 +1,16 @@
 import Link from "next/link";
-import { auth } from "./api/auth/auth";
-import { LoginButton, LogoutButton } from "./api/auth/components/buttons";
+import { createClient } from "@/lib/supabase/server";
+import { cookies } from "next/headers";
 
 export default async function Home() {
-  const session = await auth();
+  const cookieStore = cookies();
+  const supabase = createClient(cookieStore);
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   return (
     <div className="mx-auto w-full px-4.5 xs:px-6 sm:px-10 md:px-11 lg:px-12 max-w-2xl">
-      {/* <header>
+      <header>
         <nav>
           <ul>
             <li>
@@ -17,10 +21,8 @@ export default async function Home() {
             </li>
           </ul>
         </nav>
-      </header> */}
-      <main>User: {session?.user?.email || "Not logged in"}</main>
-      <LoginButton />
-      <LogoutButton />
+      </header>
+      <main>User: {user?.email || "Not logged in"}</main>
     </div>
   );
 }
