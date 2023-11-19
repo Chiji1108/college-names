@@ -1,10 +1,4 @@
 import "@/styles/globals.css";
-// import { M_PLUS_1p } from "next/font/google";
-
-// const mPlus1p = M_PLUS_1p({
-//   weight: ["100", "300", "400", "500", "700", "800", "900"],
-//   subsets: ["latin"],
-// });
 
 export const metadata = {
   title: "カレッジアプリ",
@@ -18,7 +12,12 @@ export default function RootLayout({
 }) {
   return (
     <html lang="ja">
-      <body>{children}</body>
+      <body>
+        {children}
+        <footer className="mt-16 grid place-content-center text-sm text-muted-foreground py-8">
+          &#169; College App
+        </footer>
+      </body>
     </html>
   );
 }

@@ -129,7 +129,7 @@ export const ReactionBar = ({
                 }
                 onClick={async () => {
                   if (!currentUserId) {
-                    router.push("/auth");
+                    router.push("/login");
                     return;
                   }
                   toggleOptimisticEmojiCounts({
@@ -150,7 +150,7 @@ export const ReactionBar = ({
       <ReactionPicker
         handleEmojiClick={async (emoji) => {
           if (!currentUserId) {
-            router.push("/auth");
+            router.push("/login");
             return;
           }
           toggleOptimisticEmojiCounts({ emoji, userId: currentUserId });

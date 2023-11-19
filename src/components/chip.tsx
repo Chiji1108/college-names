@@ -1,26 +1,31 @@
 import { type VariantProps, cva } from "class-variance-authority";
 
 import { cn } from "@/lib/utils";
-import { ComponentProps, HTMLAttributes, forwardRef } from "react";
+import {
+  ButtonHTMLAttributes,
+  ComponentProps,
+  HTMLAttributes,
+  forwardRef,
+} from "react";
 import { Slot } from "@radix-ui/react-slot";
 import { LinkProps } from "next/link";
 
 const chipVariants = cva(
-  "text-center inline-flex items-center rounded-full border",
+  "text-center inline-flex items-center rounded-full border bg-card text-card-foreground transition ease-in-out hover:bg-secondary hover:text-secondary-foreground disabled:border-transparent disabled:bg-secondary disabled:text-secondary-foreground",
   {
     variants: {
       size: {
         sm: "text-xs px-2 py-1",
         md: "text-base px-3 py-1",
       },
-      clickable: {
-        true: "bg-card text-card-foreground cursor-pointer transition ease-in-out hover:bg-secondary",
-        false: "border-transparent bg-secondary text-secondary-foreground",
+      selected: {
+        true: "border-primary/60 bg-primary/20 shadow-[0_0_4px_0] shadow-primary/60",
+        false: "",
       },
     },
     defaultVariants: {
       size: "md",
-      clickable: true,
+      selected: false,
     },
   }
 );
@@ -41,22 +46,22 @@ const iconVariants = cva(
 );
 
 export interface ChipProps
-  extends HTMLAttributes<HTMLLIElement>,
+  extends ButtonHTMLAttributes<HTMLButtonElement>,
     VariantProps<typeof chipVariants> {
   icon?: React.ReactNode;
 }
 
-const Chip = forwardRef<HTMLLIElement, ChipProps>(
-  ({ className, size, icon, clickable, children, ...props }, ref) => {
+const Chip = forwardRef<HTMLButtonElement, ChipProps>(
+  ({ className, size, icon, selected, children, ...props }, ref) => {
     return (
-      <li
-        className={cn(chipVariants({ size, clickable }), className)}
+      <button
+        className={cn(chipVariants({ size, selected }), className)}
         ref={ref}
         {...props}
       >
         {icon && <span className={cn(iconVariants({ size }))}>{icon}</span>}
         <span>{children}</span>
-      </li>
+      </button>
     );
   }
 );
@@ -78,18 +83,18 @@ Chip.displayName = "Chip";
 //   },
 // };
 
-export interface ChipGroupProps extends HTMLAttributes<HTMLUListElement> {}
+export interface ChipGroupProps extends HTMLAttributes<HTMLDivElement> {}
 
-const ChipGroup = forwardRef<HTMLUListElement, ChipGroupProps>(
+const ChipGroup = forwardRef<HTMLDivElement, ChipGroupProps>(
   ({ className, children, ...props }, ref) => {
     return (
-      <ul
+      <div
         className={cn("flex gap-2 flex-wrap", className)}
         ref={ref}
         {...props}
       >
         {children}
-      </ul>
+      </div>
     );
   }
 );

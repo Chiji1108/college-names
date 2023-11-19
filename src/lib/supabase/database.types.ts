@@ -398,48 +398,38 @@ export interface Database {
       }
       photos: {
         Row: {
-          caption: string | null
+          alt: string | null
           created_at: string
           height: number
           id: number
-          image_url: string
           reaction_id: number
-          user_id: string
+          src: string
           width: number
         }
         Insert: {
-          caption?: string | null
+          alt?: string | null
           created_at?: string
           height: number
           id?: number
-          image_url: string
           reaction_id: number
-          user_id?: string
+          src: string
           width: number
         }
         Update: {
-          caption?: string | null
+          alt?: string | null
           created_at?: string
           height?: number
           id?: number
-          image_url?: string
           reaction_id?: number
-          user_id?: string
+          src?: string
           width?: number
         }
         Relationships: [
           {
             foreignKeyName: "photos_reaction_id_fkey"
             columns: ["reaction_id"]
-            isOneToOne: true
-            referencedRelation: "reactions"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "photos_user_id_fkey"
-            columns: ["user_id"]
             isOneToOne: false
-            referencedRelation: "users"
+            referencedRelation: "reactions"
             referencedColumns: ["id"]
           }
         ]
@@ -660,6 +650,10 @@ export interface Database {
           mbti_id: number | null
           name: string
           paypay: string | null
+          photo1_id: number | null
+          photo2_id: number | null
+          photo3_id: number | null
+          photo4_id: number | null
           politics_id: number | null
           post_number: string | null
           religion_id: number | null
@@ -688,6 +682,10 @@ export interface Database {
           mbti_id?: number | null
           name: string
           paypay?: string | null
+          photo1_id?: number | null
+          photo2_id?: number | null
+          photo3_id?: number | null
+          photo4_id?: number | null
           politics_id?: number | null
           post_number?: string | null
           religion_id?: number | null
@@ -716,6 +714,10 @@ export interface Database {
           mbti_id?: number | null
           name?: string
           paypay?: string | null
+          photo1_id?: number | null
+          photo2_id?: number | null
+          photo3_id?: number | null
+          photo4_id?: number | null
           politics_id?: number | null
           post_number?: string | null
           religion_id?: number | null
@@ -747,6 +749,34 @@ export interface Database {
             columns: ["mbti_id"]
             isOneToOne: false
             referencedRelation: "mbti"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "users_photo1_id_fkey"
+            columns: ["photo1_id"]
+            isOneToOne: false
+            referencedRelation: "photos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "users_photo2_id_fkey"
+            columns: ["photo2_id"]
+            isOneToOne: false
+            referencedRelation: "photos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "users_photo3_id_fkey"
+            columns: ["photo3_id"]
+            isOneToOne: false
+            referencedRelation: "photos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "users_photo4_id_fkey"
+            columns: ["photo4_id"]
+            isOneToOne: false
+            referencedRelation: "photos"
             referencedColumns: ["id"]
           },
           {

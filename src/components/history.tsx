@@ -59,7 +59,7 @@ const History = forwardRef<HTMLDivElement, HistoryProps>(
           {items && (
             <ChipGroup>
               {items.map((d, i) => (
-                <Chip key={i} size="sm" clickable={false}>
+                <Chip key={i} size="sm" disabled>
                   {d}
                 </Chip>
               ))}

@@ -32,13 +32,14 @@ import { AvatarGroup } from "@/components/avatar-group";
 import ReactionBar from "@/components/reaction/reaction-bar";
 import { cookies } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
+import { getUserId } from "../get-userId-by-username";
+import { BADGE_CATEGORY } from "../get-profile-by-username";
+import { getProfile } from "../get-profile-by-username";
+import { DialogTrigger } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import Section from "./section";
+import EditProfile from "./edit-profile";
 
-const BADGE_CATEGORY = {
-  COLLEGE_SKILL: 3,
-  INTEREST: 1,
-  LIFESTAGE: 2,
-  SPOKEN_LANGUAGE: 4,
-};
 export default async function Page({
   params,
 }: {
@@ -47,54 +48,20 @@ export default async function Page({
   const { username } = params;
   //   const user = await getProfile({ username });
   const cookieStore = cookies();
-  const supabase = createClient(cookieStore, [`profiles:${username}`]);
-  const { data: user, error } = await supabase
-    .from("users")
-    .select(
-      `
-        *,
-        badges (
-        *,
-        badge_categories (*)
-        ),
-        residential_histories (*),
-        groups (
-        *,
-        group_categories (*),
-        users (*)
-        ),
-        members (
-        *
-        ),
-        mbti (*),
-        drinkings (*),
-        smokings (*),
-        politics (*),
-        religions (*),
-        educations (
-        *,
-        schools (
-            *,
-            users (*)
-        )
-        ),
-        experiences (
-        *,
-        companies (
-            *,
-            users (*)
-        )
-        ),
-        answers (
-        *,
-        questions (*)
-        ),
-        photos (*)
-    `
-    )
-    .eq("username", username)
-    .single();
+  // const { data: getUserIdResponse } = await getUserId({
+  //   username,
+  //   cookieStore,
+  // });
+  // if (!getUserIdResponse) notFound();
 
+  // const { data: user } = await getProfile({
+  //   userId: getUserIdResponse.id,
+  //   cookieStore,
+  // });
+  const { data: user } = await getProfile({
+    username,
+    cookieStore,
+  });
   if (!user) notFound();
 
   const college_skills = user.badges.filter(
@@ -117,11 +84,11 @@ export default async function Page({
 
   const notableAnswers = user.answers.filter((answer) => answer.use_on_bio);
 
-  const images = user.photos.sort((a, b) => {
-    if (a.created_at < b.created_at) return -1;
-    if (a.created_at > b.created_at) return 1;
-    return 0;
-  });
+  // const images = user.photos.sort((a, b) => {
+  //   if (a.created_at < b.created_at) return -1;
+  //   if (a.created_at > b.created_at) return 1;
+  //   return 0;
+  // });
   return (
     <div>
       <div className={container}>
@@ -131,11 +98,13 @@ export default async function Page({
               src={user.header_url}
               alt={"header"}
               fill
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
               className="object-cover object-center h-[128px] w-full"
             />
           ) : (
             <div className="h-[128px] w-full" />
           )}
+          <EditProfile userId={user.id} username={user.username} />
         </header>
         <article className="flex flex-col gap-24 snap-y">
           <section className="mx-6 -mt-[64px] flex flex-col items-center gap-2">
@@ -146,6 +115,7 @@ export default async function Page({
                   alt={"avatar"}
                   className="object-cover object-center"
                   fill
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                 />
               ) : (
                 <div className="w-full h-full bg-secondary grid place-content-center text-4xl">
@@ -175,12 +145,12 @@ export default async function Page({
           <Section icon="👋" title="Profile">
             <ChipGroup>
               {user.full_name && (
-                <Chip icon="🪪" clickable={false}>
+                <Chip icon="🪪" disabled>
                   {user.full_name}
                 </Chip>
               )}
               {user.residential_histories.map((residential_history) => (
-                <Chip key={residential_history.id} icon="👣" clickable={false}>
+                <Chip key={residential_history.id} icon="👣" disabled>
                   {residential_history.move_in_date &&
                     format(parseISO(residential_history.move_in_date), "y.M")}
                   {" ~ "}
@@ -189,17 +159,17 @@ export default async function Page({
                 </Chip>
               ))}
               {user.post_number && (
-                <Chip icon="📮" clickable={false}>
+                <Chip icon="📮" disabled>
                   {user.post_number}
                 </Chip>
               )}
               {user.room_number && (
-                <Chip icon="🛏️" clickable={false}>
+                <Chip icon="🛏️" disabled>
                   {user.room_number}
                 </Chip>
               )}
               {user.date_of_birth && (
-                <Chip icon="🎂" clickable={false}>
+                <Chip icon="🎂" disabled>
                   {format(parseISO(user.date_of_birth), "MMM d, y")}
                 </Chip>
               )}
@@ -237,6 +207,7 @@ export default async function Page({
                             <Image
                               src={group.image_url}
                               fill
+                              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                               alt="thumbnail"
                               className="object-cover object-center"
                             />
@@ -288,20 +259,20 @@ export default async function Page({
               <p className="text-center">所属しているグループはありません。</p>
             )}
           </Section>
-          {images[0] && (
+          {/* {user.photo1 && (
             <Section className="mx-0 sm:mx-6 relative">
               <div className="sm:overflow-hidden sm:rounded-lg ">
                 <Image
-                  src={images[0].image_url}
-                  alt={images[0].caption || "image1"}
-                  width={images[0].width}
-                  height={images[0].height}
+                  src={user.photo1[0].src}
+                  alt={user.photo1[0].alt || "image1"}
+                  width={user.photo1[0].width}
+                  height={user.photo1[0].height}
                   className="object-cover object-center"
                 />
               </div>
-              <ReactionBar reactionId={images[0].reaction_id} />
+              <ReactionBar reactionId={user.photo1[0].reaction_id} />
             </Section>
-          )}
+          )} */}
           {interests.length > 0 && (
             <Section icon="🏄" title="Interests">
               <ChipGroup>
@@ -335,7 +306,7 @@ export default async function Page({
               </ChipGroup>
             </Section>
           )}
-          {images[1] && (
+          {/* {user.photo2 && (
             <Section className="mx-0 sm:mx-6 relative">
               <div className="sm:overflow-hidden sm:rounded-lg">
                 <Image
@@ -348,7 +319,7 @@ export default async function Page({
               </div>
               <ReactionBar reactionId={images[1].reaction_id} />
             </Section>
-          )}
+          )} */}
           {user.educations && (
             <Section icon="🎓" title="Education">
               <HistoryGroup>
@@ -464,7 +435,7 @@ export default async function Page({
               </HistoryGroup>
             </Section>
           )}
-          {images[2] && (
+          {/* {images[2] && (
             <Section className="mx-0 sm:mx-6 relative">
               <div className="sm:overflow-hidden sm:rounded-lg">
                 <Image
@@ -477,7 +448,7 @@ export default async function Page({
               </div>
               <ReactionBar reactionId={images[2].reaction_id} />
             </Section>
-          )}
+          )} */}
           {notableAnswers.length > 0 && (
             <Section icon="💬" title="Q&A">
               <div className="flex flex-col gap-16">
@@ -533,7 +504,7 @@ export default async function Page({
             </Section>
           )}
 
-          {images[3] && (
+          {/* {images[3] && (
             <Section className="mx-0 sm:mx-6 relative">
               <div className="sm:overflow-hidden sm:rounded-lg">
                 <Image
@@ -546,7 +517,7 @@ export default async function Page({
               </div>
               <ReactionBar reactionId={images[3].reaction_id} />
             </Section>
-          )}
+          )} */}
           <Section icon="✉️" title="Contacts">
             <ChipGroup>
               {user.email && (
@@ -621,7 +592,7 @@ export default async function Page({
                       height={180}
                     />
                   }
-                  clickable={false}
+                  disabled
                 >
                   {user.paypay}
                 </Chip>
@@ -642,40 +613,6 @@ export default async function Page({
           <div className="my-16 grid place-items-center">工事中🚧</div>
         </Section>
       </div>
-      <footer className="mt-16 grid place-content-center text-sm text-muted-foreground py-8">
-        &#169; College App
-      </footer>
     </div>
-  );
-}
-
-interface SectionProps extends HTMLAttributes<HTMLDivElement> {
-  icon?: string;
-  title?: string;
-  cta?: React.ReactNode;
-}
-
-function Section({
-  icon,
-  title,
-  cta,
-  children,
-  className,
-  ...props
-}: SectionProps) {
-  return (
-    <section className={cn("mx-6", className)} {...props}>
-      {(icon || title || cta) && (
-        <div className="flex justify-between items-center mb-4">
-          <div className="font-black text-2xl flex gap-2">
-            {icon && <span>{icon}</span>}
-            {title && <h2>{title}</h2>}
-          </div>
-          {cta && <div>{cta}</div>}
-        </div>
-      )}
-      {/* {title ? <FadeIn>{children}</FadeIn> : children} */}
-      {children}
-    </section>
   );
 }
