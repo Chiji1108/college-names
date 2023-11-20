@@ -5,7 +5,6 @@ import { X } from "lucide-react";
 import {
   KeyboardEventHandler,
   useCallback,
-  useEffect,
   useOptimistic,
   useState,
 } from "react";

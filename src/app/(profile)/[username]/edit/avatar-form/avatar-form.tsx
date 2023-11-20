@@ -26,6 +26,7 @@ import Image from "next/image";
 import Avatar from "./avatar";
 import { redirect } from "next/navigation";
 import toast, { Toaster } from "react-hot-toast";
+import { useEffectOnce } from "usehooks-ts";
 
 // import { COMPANION_URL, COMPANION_ALLOWED_HOSTS } from "@uppy/transloadit";
 const bucketName = "avatars";
@@ -93,7 +94,7 @@ export function AvatarForm({
   const updateAvatarWithId = updateAvatar.bind(null, userId);
   const [optimisticAvatarUrl, setOptimisticAvatarUrl] = useState(avatarUrl);
 
-  useEffect(() => {
+  useEffectOnce(() => {
     uppy
       .on("file-added", (file) => {
         const fileName = `${nanoid()}.${file.extension}`;
@@ -121,7 +122,7 @@ export function AvatarForm({
     //   formData.append("fileName", fileName);
     //   await updateAvatarUrl(formData);
     // });
-  }, []);
+  });
 
   const supabase = createClient();
   const accessToken = useAccessToken(supabase);

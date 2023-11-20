@@ -1,8 +1,8 @@
 "use client";
 
 import { Input } from "@/components/ui/input";
-import { ChangeEvent, useEffect, useState } from "react";
-import { useDebounce } from "usehooks-ts";
+import { ChangeEvent, useState } from "react";
+import { useDebounce, useUpdateEffect } from "usehooks-ts";
 import { updateName } from "./actions";
 import toast from "react-hot-toast";
 
@@ -21,15 +21,14 @@ export default function NameForm({
     setName(event.target.value);
   };
 
-  useEffect(() => {
-    if (initialName == debouncedName) return;
+  useUpdateEffect(() => {
     const myPromise = updateNameWithId(debouncedName);
     toast.promise(myPromise, {
       loading: "ニックネームを更新中...",
       success: "ニックネームを更新しました",
       error: "ニックネームを更新できませんでした",
     });
-  }, [debouncedName]);
+  }, [debouncedName, updateNameWithId]);
 
   return (
     <div className="grid place-items-center m-2">
