@@ -22,6 +22,7 @@ export default function NameForm({
   };
 
   useUpdateEffect(() => {
+    if (debouncedName === initialName) return;
     const myPromise = updateNameWithId(debouncedName);
     toast.promise(myPromise, {
       loading: "ニックネームを更新中...",
