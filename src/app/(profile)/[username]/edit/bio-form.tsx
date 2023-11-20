@@ -2,12 +2,7 @@
 
 import { cn } from "@/lib/utils";
 import { X } from "lucide-react";
-import {
-  KeyboardEventHandler,
-  useCallback,
-  useOptimistic,
-  useState,
-} from "react";
+import { KeyboardEventHandler, useOptimistic, useState } from "react";
 
 import CreatableSelect from "react-select/creatable";
 import {

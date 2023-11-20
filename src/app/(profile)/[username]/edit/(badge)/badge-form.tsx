@@ -5,7 +5,7 @@ import { Database } from "@/lib/supabase/database.types";
 import { CategoriesWithBadges } from "./get-categories";
 import Section from "../../section";
 import { Chip, ChipGroup } from "@/components/chip";
-import { useCallback, useOptimistic, useState } from "react";
+import { useOptimistic, useState } from "react";
 import { BackButton } from "../back-button";
 import {
   Accordion,
