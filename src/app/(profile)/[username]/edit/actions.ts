@@ -34,7 +34,7 @@ export async function updateAvatar(userId: string, fileName: string) {
   }
 
   // revalidate profile
-  const { data: user } = await getUsername({ userId, cookieStore });
+  const { data: user } = await getUsername({ userId });
   if (!user) throw new Error("User not found");
   getRevalidateTags(user.username).forEach((tag) => revalidateTag(tag));
 }
@@ -49,7 +49,7 @@ export async function updateName(userId: string, name: string) {
   if (error) throw error;
 
   // revalidate profile
-  const { data: user } = await getUsername({ userId, cookieStore });
+  const { data: user } = await getUsername({ userId });
   if (!user) throw new Error("User not found");
   getRevalidateTags(user.username).forEach((tag) => revalidateTag(tag));
 }

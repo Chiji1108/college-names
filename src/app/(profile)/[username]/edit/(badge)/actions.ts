@@ -7,13 +7,12 @@ import { revalidateTag } from "next/cache";
 import { cookies } from "next/headers";
 
 export async function toggleBadge(username: string, badgeId: number) {
-  const cookieStore = cookies();
   const { data: user, error: getUserIdError } = await getUserId({
     username,
-    cookieStore,
   });
   if (getUserIdError) throw getUserIdError;
 
+  const cookieStore = cookies();
   const supabase = createClient(cookieStore);
   const { data: personalities, error } = await supabase
     .from("personalities")

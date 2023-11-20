@@ -1,11 +1,9 @@
-import { createClient } from "@/lib/supabase/server";
-import { cookies } from "next/headers";
+import { createClient } from "@/lib/supabase/withoutAuth";
 
 export const getRevalidateTags = (username: string) => [`profile:${username}`];
 
 type GetProfile = {
   username: string;
-  cookieStore: ReturnType<typeof cookies>;
 };
 
 export const BADGE_CATEGORY = {
@@ -55,8 +53,8 @@ export const selectStatement = `
         )
     `;
 
-export const getProfile = async ({ username, cookieStore }: GetProfile) => {
-  const supabase = createClient(cookieStore, getRevalidateTags(username));
+export const getProfile = async ({ username }: GetProfile) => {
+  const supabase = createClient(getRevalidateTags(username));
   return await supabase
     .from("users")
     .select(selectStatement)

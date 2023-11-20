@@ -30,8 +30,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { HistoryGroup, History } from "@/components/history";
 import { AvatarGroup } from "@/components/avatar-group";
 import ReactionBar from "@/components/reaction/reaction-bar";
-import { cookies } from "next/headers";
-import { createClient } from "@/lib/supabase/server";
+import { createClient } from "@/lib/supabase/withoutAuth";
 import { getUserId } from "../get-userId-by-username";
 import { BADGE_CATEGORY } from "../get-profile-by-username";
 import { getProfile } from "../get-profile-by-username";
@@ -40,28 +39,22 @@ import { Button } from "@/components/ui/button";
 import Section from "./section";
 import EditProfile from "./edit-profile";
 
+export async function generateStaticParams() {
+  const supabase = createClient();
+  const { data: users, error } = await supabase
+    .from("users")
+    .select("username");
+  if (error) throw error;
+  return users.map((user) => ({ username: user.username }));
+}
+
 export default async function Page({
   params,
 }: {
   params: { username: string };
 }) {
   const { username } = params;
-  //   const user = await getProfile({ username });
-  const cookieStore = cookies();
-  // const { data: getUserIdResponse } = await getUserId({
-  //   username,
-  //   cookieStore,
-  // });
-  // if (!getUserIdResponse) notFound();
-
-  // const { data: user } = await getProfile({
-  //   userId: getUserIdResponse.id,
-  //   cookieStore,
-  // });
-  const { data: user } = await getProfile({
-    username,
-    cookieStore,
-  });
+  const { data: user } = await getProfile({ username });
   if (!user) notFound();
 
   const college_skills = user.badges.filter(

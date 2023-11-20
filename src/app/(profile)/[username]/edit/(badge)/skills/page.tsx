@@ -6,6 +6,16 @@ import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
 import { getCategoriesWithBadges } from "../get-categories";
 import BadgeForm from "../badge-form";
+import { createClient } from "@/lib/supabase/withoutAuth";
+
+export async function generateStaticParams() {
+  const supabase = createClient();
+  const { data: users, error } = await supabase
+    .from("users")
+    .select("username");
+  if (error) throw error;
+  return users.map((user) => ({ username: user.username }));
+}
 
 export default async function Page({
   params,
@@ -14,7 +24,7 @@ export default async function Page({
 }) {
   const { username } = params;
   const cookieStore = cookies();
-  const { data: user } = await getProfile({ username, cookieStore });
+  const { data: user } = await getProfile({ username });
   if (!user) notFound();
 
   const categories = await getCategoriesWithBadges({ cookieStore });

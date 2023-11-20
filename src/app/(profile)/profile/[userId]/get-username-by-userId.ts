@@ -1,16 +1,14 @@
-import { createClient } from "@/lib/supabase/server";
+import { createClient } from "@/lib/supabase/withoutAuth";
 import { cookies } from "next/headers";
 
 export const getRevalidateTags = (userId: string) => [`username:${userId}`];
 
 type GetUsername = {
   userId: string;
-  cookieStore: ReturnType<typeof cookies>;
 };
 
-export const getUsername = async ({ userId, cookieStore }: GetUsername) => {
-  const supabase = createClient(cookieStore, getRevalidateTags(userId));
-
+export const getUsername = async ({ userId }: GetUsername) => {
+  const supabase = createClient(getRevalidateTags(userId));
   return await supabase
     .from("users")
     .select("id, username")

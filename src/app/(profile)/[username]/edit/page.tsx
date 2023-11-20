@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+import { createClient } from "@/lib/supabase/withoutAuth";
 import { notFound, redirect } from "next/navigation";
 import { cookies } from "next/headers";
 import { BADGE_CATEGORY, getProfile } from "../../get-profile-by-username";
@@ -14,15 +14,22 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import BioForm from "./bio-form";
 
+export async function generateStaticParams() {
+  const supabase = createClient();
+  const { data: users, error } = await supabase
+    .from("users")
+    .select("username");
+  if (error) throw error;
+  return users.map((user) => ({ username: user.username }));
+}
+
 export default async function Page({
   params,
 }: {
   params: { username: string };
 }) {
   const { username } = params;
-  const cookieStore = cookies();
-  const supabase = createClient(cookieStore);
-  const { data: user } = await getProfile({ username, cookieStore });
+  const { data: user } = await getProfile({ username });
   if (!user) notFound();
 
   const college_skills = user.badges.filter(

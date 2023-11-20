@@ -21,7 +21,7 @@ export default async function EditLayout({
   } = await supabase.auth.getUser();
   if (!currentUser) redirect("/login");
 
-  const { data: user } = await getUserId({ username, cookieStore });
+  const { data: user } = await getUserId({ username });
   if (!user) notFound();
   // access denied
   if (user.id !== currentUser.id) redirect("/login");
